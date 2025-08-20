@@ -2,7 +2,7 @@ from rest_framework import generics, permissions
 from events.models import Event
 from events.serializers.organizer_my_events_update_serializer import EventUpdateSerializer
 
-class OrganizerEventupdateView(generics.RetrieveUpdateAPIView):
+class OrganizerEventUpdateView(generics.RetrieveUpdateAPIView):
 
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = EventUpdateSerializer
