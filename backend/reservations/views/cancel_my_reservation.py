@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 
 from reservations.services.waitlist_service import promote_from_waitlist_fill
 from reservations.models.reservation import Reservation
+from events.services.realtime_metrics import broadcast_event_metrics
 
 
 class CancelMyReservation(APIView):
@@ -32,5 +33,7 @@ class CancelMyReservation(APIView):
 
         if was_confirmed:
             promote_from_waitlist_fill(event)
+
+        broadcast_event_metrics(event)
         
         return Response({"detail": "Rezerwacja została anulowana."}, status=status.HTTP_200_OK)

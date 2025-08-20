@@ -7,6 +7,8 @@ from events.services.organizer_permissions import IsEventOrganizer
 from reservations.models import Reservation
 from reservations.serializers.reservation_status_update import ReservationStatusUpdateSerializer
 from notifications.services.email import send_reservation_status_email
+from events.services.realtime_metrics import broadcast_event_metrics
+
 
 
 class ReservationStatusUpdateView(APIView):
@@ -55,6 +57,8 @@ class ReservationStatusUpdateView(APIView):
             event_end=reservation.event.end_time,
             event_location=reservation.event.location,
         )
+
+        broadcast_event_metrics(reservation.event)
 
         return Response(
             {"detail": f"Status zgłoszenia został zmieniony na '{new_status}'.", "status": new_status},
