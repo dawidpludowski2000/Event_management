@@ -1,0 +1,28 @@
+.actions {
+  display: flex;
+  gap: 20px;        /* odstęp między przyciskami */
+  flex-wrap: wrap; /* jak zabraknie miejsca, ładnie się zawinie */
+  align-items: center;
+}
+
+
+.statusConfirmed {
+  background-color: #47da4c;
+  color: #022504;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.statusCancelled {
+  background-color: #c50619;
+  color: #470303;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.statusPending {
+  background-color: #eff149;
+  color: #574205;
+  padding: 2px 6px;
+  border-radius: 4px;
+}

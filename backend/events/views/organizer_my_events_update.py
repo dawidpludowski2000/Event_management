@@ -1,0 +1,13 @@
+from rest_framework import generics, permissions
+from events.models import Event
+from events.serializers.organizer_my_events_update_serializer import EventUpdateSerializer
+
+class OrganizerEventupdateView(generics.RetrieveUpdateAPIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EventUpdateSerializer
+
+
+    def get_queryset(self):
+        
+        return Event.objects.filter(organizer=self.request.user)

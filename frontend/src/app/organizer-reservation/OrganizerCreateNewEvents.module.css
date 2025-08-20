@@ -1,0 +1,28 @@
+.buttons {
+  display: flex;
+  gap: 100px; /* odstęp między przyciskami */
+}
+
+
+.status {
+  padding: 2px 6px;
+  border: 1px solid #8b65f3;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.statusPublished {
+  background-color: #90eea6; /* jasny zielony */
+  color: #0e411a;           /* ciemny zielony tekst */
+}
+
+.statusDraft {
+  background-color: #f0ca4e; /* jasny żółty */
+  color: #5f4906;           /* ciemny żółty tekst */
+}
+
+.statusCancelled {
+  background-color: #e95949; /* ciemniejsza czerwień */
+  color: rgb(22, 21, 21);
+  
+}
