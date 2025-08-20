@@ -6,7 +6,7 @@ from events.views.available_places_to_event import EventAvailablePlacesView
 from events.views.organizer_my_events_list import OrganizerMyEventsList
 from events.views.organizer_my_events_update import OrganizerEventupdateView
 from events.views.event_publish import PublishEventView
-from events.views.event_cancell import CancelEventView
+from events.views.event_cancel import CancelEventView
 from events.views.organizer_metrics_info import OrganizerMetricsView
 
 urlpatterns = [
