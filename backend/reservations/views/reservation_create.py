@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from reservations.serializers.reservation_create import ReservationCreateSerializer
 from events.models.event import Event
-from reservations.models import Reservation
+from events.services.realtime_metrics import broadcast_event_metrics
 
 
 class ReservationCreateView(APIView):
@@ -35,6 +35,8 @@ class ReservationCreateView(APIView):
         
         
         serializer.save()
+
+        broadcast_event_metrics(event)
 
         return Response({"detail": "Rejestracja przebiegła pomyślnie."}, status=status.HTTP_201_CREATED)
     

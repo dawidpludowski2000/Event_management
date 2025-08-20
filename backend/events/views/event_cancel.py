@@ -6,6 +6,8 @@ from django.db import transaction
 from events.models import Event
 from reservations.models import Reservation
 from events.services.organizer_permissions import IsEventOrganizer
+from events.services.realtime_metrics import broadcast_event_metrics
+
 
 
 class CancelEventView(APIView):
@@ -30,5 +32,7 @@ class CancelEventView(APIView):
                 event=event,
                 status__in=["pending", "confirmed"]
             ).update(status="rejected")
+
+        broadcast_event_metrics(event)
 
         return Response({"detail": "Wydarzenie anulowane, rezerwacje odrzucone."}, status=status.HTTP_200_OK)
