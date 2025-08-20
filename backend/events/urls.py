@@ -4,7 +4,7 @@ from events.views.event_list import EventListView
 from events.views.is_user_organizer import IsUserOrganizerView
 from events.views.available_places_to_event import EventAvailablePlacesView
 from events.views.organizer_my_events_list import OrganizerMyEventsList
-from events.views.organizer_my_events_update import OrganizerEventupdateView
+from events.views.organizer_my_events_update import OrganizerEventUpdateView
 from events.views.event_publish import PublishEventView
 from events.views.event_cancel import CancelEventView
 from events.views.organizer_metrics_info import OrganizerMetricsView
@@ -26,7 +26,7 @@ urlpatterns = [
     path("organizer/my-events-list/", OrganizerMyEventsList.as_view(), name="organizer-events-list"),
 
     # Organizator: edycja mojego wydarzenia
-    path("organizer/<int:event_id>/edit/", OrganizerEventupdateView.as_view(), name="organizer-event-update"),
+    path("organizer/<int:event_id>/edit/", OrganizerEventUpdateView.as_view(), name="organizer-event-update"),
 
     # Organizator: publikacja wydarzenia
     path("organizer/<int:event_id>/publish/", PublishEventView.as_view(), name="organizer-event-publish"),
