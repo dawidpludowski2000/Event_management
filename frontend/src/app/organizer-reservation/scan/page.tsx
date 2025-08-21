@@ -8,6 +8,8 @@ import { getOrganizerReservations, checkInReservation } from "@/lib/api/reservat
 import { inspectReservation } from "@/lib/api/reservations";
 import { checkIfOrganizer } from "@/lib/utils/roles";
 import { useRouter } from "next/navigation";
+import LiveEventMetrics from "@/components/event-info/LiveEventMetrics";
+
 
 type Resv = {
   reservation_id: number;
@@ -115,6 +117,8 @@ export default function ScanPage() {
                 <li key={e.id} style={{ marginBottom: 8 }}>
                   <strong>{e.title}</strong> — {e.start_time} — {e.location}
                   <div>(Pozostało do check-inu: <b>{m.remaining}</b>)</div>
+                  <LiveEventMetrics eventId={e.id} />
+
                 </li>
               );
             })}
