@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
-    'channels'
+    'channels',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -155,7 +156,14 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',  # ← domyślna, ale w widoku IsAuthenticated
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "EventFlow API",
+    "DESCRIPTION": "API for EventFlow - events, reservations, organizers (dev)",
+    "VERSION": "1.0.0",
 }
 
 load_dotenv()
