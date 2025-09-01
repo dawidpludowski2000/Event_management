@@ -46,35 +46,35 @@ def test_reservation_endpoint():
 
 @pytest.mark.django_db
 def test_user_cannot_register_twice():
-
+    
     organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
-
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 
     now = timezone.now()
-
     event = Event.objects.create(
-        title= "Test",
-        location= "Online",
-        start_time= now + timedelta(days=1),
-        end_time= now + timedelta(days=1, hours=2),
-        seats_limit= 0,
-        organizer= organizer,
-        status= "published"
+        title="Test",
+        location="Online",
+        start_time=now + timedelta(days=1),
+        end_time=now + timedelta(days=1, hours=2),
+        seats_limit=10,
+        organizer=organizer,
+        status="published",
     )
 
-
     client = APIClient()
-
     client.force_authenticate(user=u1)
 
-    endpoint = client.post(f"/api/events/{event.id}/register/")
+    resp1 = client.post(f"/api/events/{event.id}/register/")
+    assert resp1.status_code == 201
 
-    endpoint = client.post(f"/api/events/{event.id}/register/")
+    resp2 = client.post(f"/api/events/{event.id}/register/")
+    assert resp2.status_code == 400
 
-    endpoint.json()
+    data2 = resp2.json()
+    assert "już" in data2.get("detail", "").lower() or "already" in data2.get("detail", "").lower()
 
     assert Reservation.objects.filter(user=u1, event=event).count() == 1
+
 
 @pytest.mark.django_db
 def test_register_requires_auth():
@@ -95,15 +95,15 @@ def test_register_requires_auth():
 
     client = APIClient()
 
-    endpoint = client.post(f"/api/events/{event.id}/register/")
+    resp = client.post(f"/api/events/{event.id}/register/")
 
     
 
-    assert endpoint.status_code == 401
+    assert resp.status_code == 401
     assert Reservation.objects.filter(event=event).count() == 0
     
 
-    print("JSON:", endpoint.json())
+    print("JSON:", resp.json())
 
 @pytest.mark.django_db
 def test_register_rejects_draft_event():
@@ -130,7 +130,7 @@ def test_register_rejects_draft_event():
     client.force_authenticate(user=u1)
 
 
-    endpoint = client.post(f"/api/events/{event.id}/register/")
+    resp = client.post(f"/api/events/{event.id}/register/")
 
     assert Reservation.objects.filter(user=u1, event=event).count() == 0
 
@@ -163,12 +163,12 @@ def test_checkin_requires_confirmed_status():
 
     client.force_authenticate(user=organizer)
 
-    endpoint = client.post(f"/api/reservations/{res.id}/check-in/")
+    resp = client.post(f"/api/reservations/{res.id}/check-in/")
 
 
 
-    assert endpoint.status_code == 400
-    assert "potwierdzone" in endpoint.json().get("detail", "").lower()
+    assert resp.status_code == 400
+    assert "potwierdzone" in resp.json().get("detail", "").lower()
 
     res.refresh_from_db()
     assert res.checked_in is False
@@ -220,3 +220,40 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
     res.refresh_from_db()
     assert res.checked_in is True
+
+
+@pytest.mark.django_db
+def test_checkin_forbidden_for_non_organizer():
+
+    organizer = CustomUser.objects.create_user(email= "org@example.com", password= "pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        status= "published"
+    )
+
+    res = Reservation.objects.create(event=event, user=u1, status="confirmed")
+
+    client = APIClient()
+
+    client.force_authenticate(user=u1)
+
+    resp = client.post(f"/api/reservations/{res.id}/check-in/")
+
+    assert resp.status_code == 403
+
+    res.refresh_from_db()
+
+    
+
+    assert res.checked_in is False 
