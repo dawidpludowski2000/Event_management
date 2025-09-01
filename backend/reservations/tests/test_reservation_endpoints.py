@@ -1,0 +1,222 @@
+import pytest
+from rest_framework.test import APIClient
+from unittest.mock import patch
+
+from django.utils import timezone
+from datetime import timedelta
+
+from users.models.user import CustomUser
+from events.models import Event
+from reservations.models import Reservation
+
+
+@pytest.mark.django_db
+def test_reservation_endpoint():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        status= "published"
+    )
+
+
+    client = APIClient() 
+
+    client.force_authenticate(user=u1)
+
+    resp = client.post(f"/api/events/{event.id}/register/")
+
+    
+
+    assert resp.status_code == 201
+
+
+    assert Reservation.objects.filter(user=u1, event=event, status="pending").count() == 1
+
+
+@pytest.mark.django_db
+def test_user_cannot_register_twice():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 0,
+        organizer= organizer,
+        status= "published"
+    )
+
+
+    client = APIClient()
+
+    client.force_authenticate(user=u1)
+
+    endpoint = client.post(f"/api/events/{event.id}/register/")
+
+    endpoint = client.post(f"/api/events/{event.id}/register/")
+
+    endpoint.json()
+
+    assert Reservation.objects.filter(user=u1, event=event).count() == 1
+
+@pytest.mark.django_db
+def test_register_requires_auth():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        status= "published"
+    )
+
+    client = APIClient()
+
+    endpoint = client.post(f"/api/events/{event.id}/register/")
+
+    
+
+    assert endpoint.status_code == 401
+    assert Reservation.objects.filter(event=event).count() == 0
+    
+
+    print("JSON:", endpoint.json())
+
+@pytest.mark.django_db
+def test_register_rejects_draft_event():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+    
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        
+    )
+
+    client = APIClient()
+
+    client.force_authenticate(user=u1)
+
+
+    endpoint = client.post(f"/api/events/{event.id}/register/")
+
+    assert Reservation.objects.filter(user=u1, event=event).count() == 0
+
+
+@pytest.mark.django_db
+def test_checkin_requires_confirmed_status():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        status= "published"
+    )
+
+
+    res = Reservation.objects.create(event=event, user=u1, status="pending")
+
+
+
+    client = APIClient()
+
+    client.force_authenticate(user=organizer)
+
+    endpoint = client.post(f"/api/reservations/{res.id}/check-in/")
+
+
+
+    assert endpoint.status_code == 400
+    assert "potwierdzone" in endpoint.json().get("detail", "").lower()
+
+    res.refresh_from_db()
+    assert res.checked_in is False
+
+
+@pytest.mark.django_db
+def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
+
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+
+    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
+
+    now = timezone.now()
+
+    event = Event.objects.create(
+        title= "Test",
+        location= "Online",
+        start_time= now + timedelta(days=1),
+        end_time= now + timedelta(days=1, hours=2),
+        seats_limit= 10,
+        organizer= organizer,
+        status= "published"
+    )
+
+    client = APIClient()
+
+    client.force_authenticate(user=organizer)
+
+    res = Reservation.objects.create(event=event, user=u1, status="confirmed")
+
+    with patch("reservations.views.organizer_reservation_check_in_ticket.broadcast_event_metrics") as broadcast_mock:
+        resp1 = client.post(f"/api/reservations/{res.id}/check-in/")
+        resp2 = client.post(f"/api/reservations/{res.id}/check-in/")
+
+    assert broadcast_mock.call_count == 1
+
+    assert resp1.status_code == 200 
+
+    data1 = resp1.json()
+    assert data1.get("checked_in") is True
+    assert data1.get("reservation_id") == res.id
+
+    res.refresh_from_db()
+    assert res.checked_in is True
+
+    assert resp2.status_code == 200
+    data2 = resp2.json()
+    assert "oznaczona" in data2.get("detail", "").lower() or "already" in data2.get("detail", "").lower()
+
+    res.refresh_from_db()
+    assert res.checked_in is True
