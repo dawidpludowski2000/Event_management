@@ -10,7 +10,7 @@ from reservations.models import Reservation
 
 
 @pytest.mark.django_db
-def test_cancel_event_rejects_all_and_broadcasts_once():
+def test_confirm_blocked_when_full_returns_400_and_no_side_effects():
 
     organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
 
