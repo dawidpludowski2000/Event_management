@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 # klasa z Django Channels, umożliwiająca pisanie consumer, które obsługują asynchroniczne połączenia (pisanie, odbieranie w: JSON)
 class EventConsumer(AsyncJsonWebsocketConsumer):
-    
+
     async def connect(self):
         # metoda wywoływana automatycznie, gdy klient otwiera połączenie WebSocket
         try:
@@ -23,7 +23,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
     # Odbiera wiadomości wysyłane przez group_send(type="event.metrics", payload=...)
     async def event_metrics(self, event):
-        
+
         print("[DEBUG] consumer event_metrics:", event.get("payload"))
 
         await self.send_json(event["payload"])

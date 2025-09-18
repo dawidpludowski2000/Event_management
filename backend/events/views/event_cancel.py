@@ -1,13 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
 from django.db import transaction
-
 from events.models import Event
-from reservations.models import Reservation
 from events.services.organizer_permissions import IsEventOrganizer
 from events.services.realtime_metrics import broadcast_event_metrics
-
+from reservations.models import Reservation
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class CancelEventView(APIView):
@@ -17,10 +15,14 @@ class CancelEventView(APIView):
         try:
             event = Event.objects.get(pk=event_id)
         except Event.DoesNotExist:
-            return Response({"detail": "Event nie istnieje."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Event nie istnieje."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         if event.status == "cancelled":
-            return Response({"detail": "Wydarzenie jest już anulowane."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Wydarzenie jest już anulowane."}, status=status.HTTP_200_OK
+            )
 
         with transaction.atomic():
             # 1. Anulowanie wydarzenia
@@ -29,10 +31,12 @@ class CancelEventView(APIView):
 
             # 2. Automatyczne odrzucenie powiązanych rezerwacji
             Reservation.objects.filter(
-                event=event,
-                status__in=["pending", "confirmed"]
+                event=event, status__in=["pending", "confirmed"]
             ).update(status="rejected")
 
         broadcast_event_metrics(event)
 
-        return Response({"detail": "Wydarzenie anulowane, rezerwacje odrzucone."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Wydarzenie anulowane, rezerwacje odrzucone."},
+            status=status.HTTP_200_OK,
+        )

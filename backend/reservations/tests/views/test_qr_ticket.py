@@ -1,11 +1,12 @@
-import pytest
-from rest_framework.test import APIClient
-from django.utils import timezone
+import uuid
 from datetime import timedelta
-from users.models import CustomUser
+
+import pytest
+from django.utils import timezone
 from events.models import Event
 from reservations.models import Reservation
-import uuid
+from rest_framework.test import APIClient
+from users.models import CustomUser
 
 
 @pytest.mark.django_db

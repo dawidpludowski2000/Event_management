@@ -6,13 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('events', '0001_initial'),
+        ("events", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='status',
-            field=models.CharField(choices=[('draft', 'Szkic'), ('published', 'Opublikowane'), ('cancelled', 'Anulowane')], default='draft', max_length=12),
+            model_name="event",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("draft", "Szkic"),
+                    ("published", "Opublikowane"),
+                    ("cancelled", "Anulowane"),
+                ],
+                default="draft",
+                max_length=12,
+            ),
         ),
     ]

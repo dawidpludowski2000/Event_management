@@ -1,27 +1,39 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q, F, Value, IntegerField
+from django.db.models import Count, F, Q
 from events.models import Event
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 
 class OrganizerMetricsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         qs = (
-            Event.objects
-            .filter(organizer=request.user)
+            Event.objects.filter(organizer=request.user)
             .annotate(
-                confirmed_count=Count("reservations", filter=Q(reservations__status="confirmed")),
-                pending_count=Count("reservations", filter=Q(reservations__status="pending")),
-                checked_in_count=Count("reservations", filter=Q(reservations__checked_in=True)),
+                confirmed_count=Count(
+                    "reservations", filter=Q(reservations__status="confirmed")
+                ),
+                pending_count=Count(
+                    "reservations", filter=Q(reservations__status="pending")
+                ),
+                checked_in_count=Count(
+                    "reservations", filter=Q(reservations__checked_in=True)
+                ),
             )
-            .annotate(
-                spots_left=F("seats_limit") - F("confirmed_count")
+            .annotate(spots_left=F("seats_limit") - F("confirmed_count"))
+            .values(
+                "id",
+                "title",
+                "start_time",
+                "location",
+                "seats_limit",
+                "confirmed_count",
+                "pending_count",
+                "checked_in_count",
+                "spots_left",
             )
-            .values("id", "title", "start_time", "location",
-                    "seats_limit", "confirmed_count", "pending_count",
-                    "checked_in_count", "spots_left")
         )
         # max(0, spots_left) w Pythonie:
         data = []

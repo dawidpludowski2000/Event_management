@@ -1,22 +1,15 @@
-import pytest
-from django.utils import timezone
 from datetime import datetime, timedelta
-from channels.db import database_sync_to_async
+
+import pytest
 from asgiref.sync import sync_to_async
-
+from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
-
-
 from channels.testing import WebsocketCommunicator
 from config.asgi import application
-
-from users.models import CustomUser
+from django.utils import timezone
 from events.models import Event
-
 from tests.utils import unique_email
-
-
-
+from users.models import CustomUser
 
 
 @pytest.mark.asyncio
@@ -24,12 +17,11 @@ from tests.utils import unique_email
 async def test_ws_connects_ok():
 
     organizer = await database_sync_to_async(CustomUser.objects.create_user)(
-    email=unique_email(), password="pass"
+        email=unique_email(), password="pass"
     )
 
-    
-    now = timezone.now() 
-    
+    now = timezone.now()
+
     event = await database_sync_to_async(Event.objects.create)(
         title="WS test",
         location="Online",
@@ -40,23 +32,22 @@ async def test_ws_connects_ok():
         organizer=organizer,
     )
 
-
     communicator = WebsocketCommunicator(application, f"/ws/events/{event.id}/")
 
     connected, _ = await communicator.connect()
 
     assert connected is True
-     
+
     await communicator.disconnect()
 
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_ws_metrics_broadcasts_json():
-    
+
     organizer = await sync_to_async(CustomUser.objects.create_user)(
-    email=unique_email(), password="pass"
-)
+        email=unique_email(), password="pass"
+    )
 
     now = timezone.now()
     event = await sync_to_async(Event.objects.create)(
