@@ -1,0 +1,17 @@
+line-length = 100
+target-version = "py312"
+
+exclude = [
+  "*/migrations/*",
+  ".venv",
+]
+
+[lint]
+# podstawowe reguły: pycodestyle (E), pyflakes (F), isort (I)
+select = ["E", "F", "I"]
+# długie linie zostawiamy Blackowi
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+# w testach często się trafia F401 (świadomie zostawimy)
+"**/tests/**" = ["F401"]
