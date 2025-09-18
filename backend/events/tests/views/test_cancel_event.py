@@ -1,15 +1,13 @@
-import pytest
-from unittest.mock import patch
-from rest_framework.test import APIClient
-from django.utils import timezone
 from datetime import timedelta
+from unittest.mock import patch
 
-from users.models import CustomUser
+import pytest
+from django.utils import timezone
 from events.models import Event
 from reservations.models import Reservation
-
+from rest_framework.test import APIClient
 from tests.utils import unique_email
-
+from users.models import CustomUser
 
 
 @pytest.mark.django_db
@@ -21,19 +19,17 @@ def test_cancel_event_rejects_all_and_broadcasts_once():
     u2 = CustomUser.objects.create_user(email="u2@example.com", password="pass")
     u3 = CustomUser.objects.create_user(email="u3@example.com", password="pass")
 
+    now = timezone.now()
 
-    now = timezone.now() 
-    
     event = Event.objects.create(
-        title= "Test",
-        location= "Online",
-        start_time= now + timedelta(days=1),
-        end_time= now + timedelta(days=2, hours=2),
-        seats_limit= 2,
-        status= "published",
-        organizer= organizer
+        title="Test",
+        location="Online",
+        start_time=now + timedelta(days=1),
+        end_time=now + timedelta(days=2, hours=2),
+        seats_limit=2,
+        status="published",
+        organizer=organizer,
     )
-
 
     client = APIClient()
     client.force_authenticate(organizer)
@@ -42,11 +38,9 @@ def test_cancel_event_rejects_all_and_broadcasts_once():
     Reservation.objects.create(event=event, user=u2, status="confirmed")
     Reservation.objects.create(event=event, user=u3, status="rejected")
 
-    
     with patch("events.views.event_cancel.broadcast_event_metrics") as broadcast_mock:
-        
-        resp = client.post(f"/api/events/organizer/{event.id}/cancel/")
 
+        resp = client.post(f"/api/events/organizer/{event.id}/cancel/")
 
     assert resp.status_code == 200
 

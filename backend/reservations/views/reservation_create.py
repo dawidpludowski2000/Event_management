@@ -1,49 +1,47 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 import logging
 
-from reservations.serializers.reservation_create import ReservationCreateSerializer
 from events.models.event import Event
 from events.services.realtime_metrics import broadcast_event_metrics
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from reservations.serializers.reservation_create import ReservationCreateSerializer
 
 
 class ReservationCreateView(APIView):
-    
+
     permission_classes = [IsAuthenticated]
 
-    
-    def post(self, request, event_id): 
+    def post(self, request, event_id):
 
         try:
             event = Event.objects.get(id=event_id)
         except Event.DoesNotExist:
-            return Response({"detail": "Wydarzenie nie istnieje."}, status=status.HTTP_404_NOT_FOUND)
-        
-    
-        serializer = ReservationCreateSerializer(
+            return Response(
+                {"detail": "Wydarzenie nie istnieje."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-            data={"event": event.id},
-            context={"request": request}
+        serializer = ReservationCreateSerializer(
+            data={"event": event.id}, context={"request": request}
         )
 
         if not serializer.is_valid():
-            
+
             logger = logging.getLogger(__name__)
 
-            logger.warning("Validation error on reservation create: %s", serializer.errors)
-
+            logger.warning(
+                "Validation error on reservation create: %s", serializer.errors
+            )
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-        
+
         serializer.save()
 
         broadcast_event_metrics(event)
 
-        return Response({"detail": "Rejestracja przebiegła pomyślnie."}, status=status.HTTP_201_CREATED)
-    
-    
-   
+        return Response(
+            {"detail": "Rejestracja przebiegła pomyślnie."},
+            status=status.HTTP_201_CREATED,
+        )

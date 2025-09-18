@@ -1,13 +1,13 @@
-import pytest
-from unittest.mock import patch
-from rest_framework.test import APIClient
-from django.utils import timezone
 from datetime import timedelta
-from users.models import CustomUser
+from unittest.mock import patch
+
+import pytest
+from django.utils import timezone
 from events.models import Event
 from reservations.models import Reservation
-
+from rest_framework.test import APIClient
 from tests.utils import unique_email
+from users.models import CustomUser
 
 
 @pytest.mark.django_db
@@ -20,27 +20,22 @@ def test_checkin_requires_confirmed_status():
     now = timezone.now()
 
     event = Event.objects.create(
-        title= "Test",
-        location= "Online",
-        start_time= now + timedelta(days=1),
-        end_time= now + timedelta(days=1, hours=2),
-        seats_limit= 10,
-        organizer= organizer,
-        status= "published"
+        title="Test",
+        location="Online",
+        start_time=now + timedelta(days=1),
+        end_time=now + timedelta(days=1, hours=2),
+        seats_limit=10,
+        organizer=organizer,
+        status="published",
     )
 
-
     res = Reservation.objects.create(event=event, user=u1, status="pending")
-
-
 
     client = APIClient()
 
     client.force_authenticate(user=organizer)
 
     resp = client.post(f"/api/reservations/{res.id}/check-in/")
-
-
 
     assert resp.status_code == 400
     assert "potwierdzone" in resp.json().get("detail", "").lower()
@@ -59,13 +54,13 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
     now = timezone.now()
 
     event = Event.objects.create(
-        title= "Test",
-        location= "Online",
-        start_time= now + timedelta(days=1),
-        end_time= now + timedelta(days=1, hours=2),
-        seats_limit= 10,
-        organizer= organizer,
-        status= "published"
+        title="Test",
+        location="Online",
+        start_time=now + timedelta(days=1),
+        end_time=now + timedelta(days=1, hours=2),
+        seats_limit=10,
+        organizer=organizer,
+        status="published",
     )
 
     client = APIClient()
@@ -74,13 +69,15 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
     res = Reservation.objects.create(event=event, user=u1, status="confirmed")
 
-    with patch("reservations.views.organizer_reservation_check_in_ticket.broadcast_event_metrics") as broadcast_mock:
+    with patch(
+        "reservations.views.organizer_reservation_check_in_ticket.broadcast_event_metrics"
+    ) as broadcast_mock:
         resp1 = client.post(f"/api/reservations/{res.id}/check-in/")
         resp2 = client.post(f"/api/reservations/{res.id}/check-in/")
 
     assert broadcast_mock.call_count == 1
 
-    assert resp1.status_code == 200 
+    assert resp1.status_code == 200
 
     data1 = resp1.json()
     assert data1.get("checked_in") is True
@@ -91,7 +88,10 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
     assert resp2.status_code == 200
     data2 = resp2.json()
-    assert "oznaczona" in data2.get("detail", "").lower() or "already" in data2.get("detail", "").lower()
+    assert (
+        "oznaczona" in data2.get("detail", "").lower()
+        or "already" in data2.get("detail", "").lower()
+    )
 
     res.refresh_from_db()
     assert res.checked_in is True
@@ -100,21 +100,20 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 @pytest.mark.django_db
 def test_checkin_forbidden_for_non_organizer():
 
-    organizer = CustomUser.objects.create_user(email= "org@example.com", password= "pass")
+    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
-
 
     now = timezone.now()
 
     event = Event.objects.create(
-        title= "Test",
-        location= "Online",
-        start_time= now + timedelta(days=1),
-        end_time= now + timedelta(days=1, hours=2),
-        seats_limit= 10,
-        organizer= organizer,
-        status= "published"
+        title="Test",
+        location="Online",
+        start_time=now + timedelta(days=1),
+        end_time=now + timedelta(days=1, hours=2),
+        seats_limit=10,
+        organizer=organizer,
+        status="published",
     )
 
     res = Reservation.objects.create(event=event, user=u1, status="confirmed")
@@ -129,6 +128,4 @@ def test_checkin_forbidden_for_non_organizer():
 
     res.refresh_from_db()
 
-    
-
-    assert res.checked_in is False 
+    assert res.checked_in is False

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reservations', '0001_initial'),
+        ("reservations", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='reservation',
-            name='checked_in',
+            model_name="reservation",
+            name="checked_in",
             field=models.BooleanField(default=False),
         ),
     ]

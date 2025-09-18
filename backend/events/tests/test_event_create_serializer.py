@@ -2,13 +2,16 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from events.serializers.event_create import EventCreateSerializer
 
 
 def _iso_z(dt):
     # upewniamy się, że mamy datę w UTC i zwracamy format z końcówką "Z"
-    return dt.astimezone(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return (
+        dt.astimezone(timezone.utc)
+        .replace(microsecond=0)
+        .strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
 
 
 def test_end_time_must_be_after_start():

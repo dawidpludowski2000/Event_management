@@ -1,6 +1,8 @@
 # backend/tests/conftest.py
 import uuid
+
 import pytest
+
 
 @pytest.fixture
 def unique_email() -> str:

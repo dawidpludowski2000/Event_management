@@ -1,6 +1,6 @@
-from rest_framework import generics, permissions
 from events.models import Event
 from events.serializers.event_list import EventListSerializer
+from rest_framework import generics, permissions
 
 
 class OrganizerMyEventsList(generics.ListAPIView):

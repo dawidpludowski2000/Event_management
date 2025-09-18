@@ -1,10 +1,12 @@
 # notifications/services/email.py
-from datetime import datetime, date, time, timezone as dt_timezone
-from django.core.mail import EmailMultiAlternatives
-from django.conf import settings
-from django.utils.html import strip_tags
-from django.utils import timezone
 import logging
+from datetime import date, datetime, time
+from datetime import timezone as dt_timezone
+
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
+from django.utils.html import strip_tags
 
 
 def _ensure_datetime(value) -> datetime:
@@ -49,8 +51,8 @@ def send_reservation_status_email(
     user_email: str,
     user_name: str,
     event_title: str,
-    event_date,          # datetime/date – start wydarzenia
-    status: str,         # "confirmed" | "rejected" | "pending"
+    event_date,  # datetime/date – start wydarzenia
+    status: str,  # "confirmed" | "rejected" | "pending"
     reply_to: str | None = None,
     event_end=None,
     event_location: str = "",
@@ -63,17 +65,25 @@ def send_reservation_status_email(
     # --- SOFT GUARD: brak SMTP → nie wysyłaj, ale nie wysadzaj aplikacji ---
     # Testy z locmem backendem dalej przejdą (override_settings w testach).
     if str(getattr(settings, "EMAIL_BACKEND", "")).endswith("smtp.EmailBackend"):
-        if not getattr(settings, "EMAIL_HOST", None) or not getattr(settings, "EMAIL_HOST_USER", None):
-            
+        if not getattr(settings, "EMAIL_HOST", None) or not getattr(
+            settings, "EMAIL_HOST_USER", None
+        ):
+
             logger = logging.getLogger(__name__)
 
-            logger.warning("SMTP config missing (EMAIL_HOST/EMAIL_HOST_USER). Skipping send.")
+            logger.warning(
+                "SMTP config missing (EMAIL_HOST/EMAIL_HOST_USER). Skipping send."
+            )
 
             return
 
     status = (status or "").strip().lower()
 
-    label_map = {"confirmed": "potwierdzona", "rejected": "odrzucona", "pending": "oczekująca"}
+    label_map = {
+        "confirmed": "potwierdzona",
+        "rejected": "odrzucona",
+        "pending": "oczekująca",
+    }
     status_label = label_map.get(status, status)
     subject = f"Twoja rezerwacja: {event_title} – {status_label}"
 
@@ -100,11 +110,10 @@ def send_reservation_status_email(
         ics = build_event_ics(
             title=event_title,
             start=event_date,
-            end=event_end or event_date,        # ← użyj end jeśli podano
+            end=event_end or event_date,  # ← użyj end jeśli podano
             location=event_location or "",
             uid=f"{user_email}-{event_title}-{str(event_date)}",
         )
         msg.attach(filename="event.ics", content=ics, mimetype="text/calendar")
 
     msg.send(fail_silently=False)
-
