@@ -24,17 +24,36 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 
 
 
+# --- v1 package ---
+api_v1_patterns = [
+    path("users/", include("users.urls")),
+    path("events/", include("events.urls")),
+    path("", include("reservations.urls")),
+    path("login/", TokenObtainPairView.as_view(), name="login_v1"),
+    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair_v1"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh_v1"),
+    path("schema/", SpectacularAPIView.as_view(), name="schema_v1"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema_v1"), name="swagger_ui_v1"),
+    path("redoc/", SpectacularRedocView.as_view(url_name="schema_v1"), name="redoc_v1"),
+]
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/users/', include('users.urls')),
-    path('api/events/', include('events.urls')),
-    path('api/', include("reservations.urls")),
+    path("admin/", admin.site.urls),
+
+    # --- legacy (działa jak dotąd) ---
+    path("api/users/", include("users.urls")),
+    path("api/events/", include("events.urls")),
+    path("api/", include("reservations.urls")),
+    path("api/login/", TokenObtainPairView.as_view(), name="login"),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/login/", TokenObtainPairView.as_view(), name="login"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    ]
+
+
+    # --- oficjalne v1 ---
+    path("api/v1/", include((api_v1_patterns, "apiv1"))),
+]
 
 
