@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from reservations.models import Reservation
+from rest_framework import serializers
 
 
 class ReservationInspectSerializer(serializers.ModelSerializer):

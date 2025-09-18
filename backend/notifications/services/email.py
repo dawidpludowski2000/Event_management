@@ -68,7 +68,6 @@ def send_reservation_status_email(
         if not getattr(settings, "EMAIL_HOST", None) or not getattr(
             settings, "EMAIL_HOST_USER", None
         ):
-
             logger = logging.getLogger(__name__)
 
             logger.warning(

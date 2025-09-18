@@ -11,7 +11,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_inspect_view_allows_organizer_returns_200():
-
     organizer = CustomUser.objects.create_user(
         email="organizer@example.com", password="pass"
     )
@@ -50,7 +49,6 @@ def test_inspect_view_allows_organizer_returns_200():
 
 @pytest.mark.django_db
 def test_inspect_view_denies_other_user_returns_403():
-
     organizer = CustomUser.objects.create_user(
         email="organizer@example.com", password="pass"
     )
@@ -83,7 +81,6 @@ def test_inspect_view_denies_other_user_returns_403():
 
 @pytest.mark.django_db
 def test_inspect_view_requires_auth_returns_401():
-
     organizer = CustomUser.objects.create_user(
         email="organizer@example.com", password="pass"
     )

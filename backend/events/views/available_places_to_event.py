@@ -6,16 +6,13 @@ from rest_framework.views import APIView
 
 
 class EventAvailablePlacesView(APIView):
-
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, event_id):
-
         try:
             event = Event.objects.get(id=event_id)
 
         except Event.DoesNotExist:
-
             return Response(
                 {"detail": "Event not found."}, status=status.HTTP_404_NOT_FOUND
             )

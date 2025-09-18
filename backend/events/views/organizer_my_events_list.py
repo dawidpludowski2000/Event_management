@@ -4,7 +4,6 @@ from rest_framework import generics, permissions
 
 
 class OrganizerMyEventsList(generics.ListAPIView):
-
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = EventListSerializer
 

@@ -1,10 +1,8 @@
-from rest_framework import serializers
-
 from reservations.models import Reservation
+from rest_framework import serializers
 
 
 class ReservationListSerializer(serializers.ModelSerializer):
-
     user_email = serializers.EmailField(source="user.email", read_only=True)
     event_title = serializers.CharField(source="event.title", read_only=True)
     event_start_time = serializers.DateTimeField(

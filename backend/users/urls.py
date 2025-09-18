@@ -1,6 +1,5 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
 from users.views.activate_user import ActivateUserView
 from users.views.auth import RegisterView
 

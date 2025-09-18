@@ -1,5 +1,4 @@
 from django.urls import path
-
 from reservations.views.cancel_my_reservation import CancelMyReservation
 from reservations.views.my_reservation import MyReservationsView
 from reservations.views.my_single_reservation_detail import (

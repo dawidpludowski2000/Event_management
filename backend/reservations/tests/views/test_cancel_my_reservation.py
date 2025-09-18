@@ -11,7 +11,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_cancel_my_confirmed_reservation_promotes_waitlist_and_broadcasts():
-
     organizer = CustomUser.objects.create_user(
         email="organizer@example.com", password="pass"
     )
@@ -47,7 +46,6 @@ def test_cancel_my_confirmed_reservation_promotes_waitlist_and_broadcasts():
             "reservations.views.cancel_my_reservation.broadcast_event_metrics"
         ) as broadcast_mock,
     ):
-
         resp = client.delete(f"/api/reservations/{res.id}/")
 
     assert resp.status_code == 200
@@ -60,7 +58,6 @@ def test_cancel_my_confirmed_reservation_promotes_waitlist_and_broadcasts():
 
 @pytest.mark.django_db
 def test_cancel_pending_reservation_does_not_promote_but_broadcasts():
-
     organizer = CustomUser.objects.create_user(
         email="organizer@example.com", password="pass"
     )
@@ -93,7 +90,6 @@ def test_cancel_pending_reservation_does_not_promote_but_broadcasts():
             "reservations.views.cancel_my_reservation.broadcast_event_metrics"
         ) as broadcast_mock,
     ):
-
         resp = client.delete(f"/api/reservations/{res.id}/")
 
     assert promote_mock.call_count == 0

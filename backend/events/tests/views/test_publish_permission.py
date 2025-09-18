@@ -10,7 +10,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_publish_event_forbidden_for_non_organizer_returns_403():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")

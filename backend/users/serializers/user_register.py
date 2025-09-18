@@ -1,11 +1,9 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from users.models import CustomUser
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-
     password = serializers.CharField(write_only=True, min_length=6)
 
     email = serializers.EmailField(
@@ -17,7 +15,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-
         model = CustomUser
         fields = ["email", "first_name", "last_name", "password"]
 
@@ -25,5 +22,4 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return value.strip().lower()
 
     def create(self, validated_data):
-
         return CustomUser.objects.create_user(**validated_data)

@@ -3,7 +3,6 @@ from users.models import CustomUser
 
 
 class Event(models.Model):
-
     STATUS_CHOICES = [
         ("draft", "Szkic"),
         ("published", "Opublikowane"),

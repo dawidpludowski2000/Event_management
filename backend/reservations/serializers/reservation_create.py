@@ -1,11 +1,9 @@
 from django.utils import timezone
-from rest_framework import serializers
-
 from reservations.models.reservation import Reservation
+from rest_framework import serializers
 
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Reservation
         fields = ["event", "status"]

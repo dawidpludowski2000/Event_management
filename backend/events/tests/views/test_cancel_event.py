@@ -12,7 +12,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_cancel_event_rejects_all_and_broadcasts_once():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -39,7 +38,6 @@ def test_cancel_event_rejects_all_and_broadcasts_once():
     Reservation.objects.create(event=event, user=u3, status="rejected")
 
     with patch("events.views.event_cancel.broadcast_event_metrics") as broadcast_mock:
-
         resp = client.post(f"/api/events/organizer/{event.id}/cancel/")
 
     assert resp.status_code == 200

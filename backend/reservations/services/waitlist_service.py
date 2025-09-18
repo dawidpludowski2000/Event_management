@@ -3,7 +3,6 @@ import logging
 
 from django.db import connection, transaction
 from notifications.services.email import send_reservation_status_email
-
 from reservations.models import Reservation
 
 

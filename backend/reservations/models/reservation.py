@@ -4,7 +4,6 @@ from users.models import CustomUser
 
 
 class Reservation(models.Model):
-
     STATUS_CHOICES = [
         ("pending", "Oczekuje"),
         ("confirmed", "Potwierdzony"),

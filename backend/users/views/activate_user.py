@@ -9,7 +9,6 @@ class ActivateUserView(APIView):
     permission_classes = []
 
     def get(self, request, token):
-
         try:
             token_obj = ActivationToken.objects.select_related("user").get(token=token)
         except ActivationToken.DoesNotExist:

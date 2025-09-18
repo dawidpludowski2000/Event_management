@@ -2,14 +2,13 @@ from django.db import transaction
 from events.services.organizer_permissions import IsEventOrganizer
 from events.services.realtime_metrics import broadcast_event_metrics
 from notifications.services.email import send_reservation_status_email
-from rest_framework import permissions, status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from reservations.models import Reservation
 from reservations.serializers.reservation_status_update import (
     ReservationStatusUpdateSerializer,
 )
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class ReservationStatusUpdateView(APIView):
