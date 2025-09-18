@@ -4,6 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.utils.html import strip_tags
 from django.utils import timezone
+import logging
 
 
 def _ensure_datetime(value) -> datetime:
@@ -63,7 +64,11 @@ def send_reservation_status_email(
     # Testy z locmem backendem dalej przejdą (override_settings w testach).
     if str(getattr(settings, "EMAIL_BACKEND", "")).endswith("smtp.EmailBackend"):
         if not getattr(settings, "EMAIL_HOST", None) or not getattr(settings, "EMAIL_HOST_USER", None):
-            print("[MAIL][WARN] Missing SMTP config (EMAIL_HOST/EMAIL_HOST_USER). Skipping send.")
+            
+            logger = logging.getLogger(__name__)
+
+            logger.warning("SMTP config missing (EMAIL_HOST/EMAIL_HOST_USER). Skipping send.")
+
             return
 
     status = (status or "").strip().lower()

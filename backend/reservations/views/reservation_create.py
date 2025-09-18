@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+import logging
 
 from reservations.serializers.reservation_create import ReservationCreateSerializer
 from events.models.event import Event
@@ -29,7 +30,11 @@ class ReservationCreateView(APIView):
 
         if not serializer.is_valid():
             
-            print("❌ Błąd walidacji:", serializer.errors)
+            logger = logging.getLogger(__name__)
+
+            logger.warning("Validation error on reservation create: %s", serializer.errors)
+
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         
