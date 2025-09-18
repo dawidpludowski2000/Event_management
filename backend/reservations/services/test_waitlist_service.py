@@ -12,10 +12,12 @@ from reservations.models import Reservation
 
 from reservations.services.waitlist_service import promote_from_waitlist_fill
 
+from tests.utils import unique_email
+
 @pytest.mark.django_db
 def test_promote_from_waitlist_happy_path():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
     u2 = CustomUser.objects.create_user(email="u2@example.com", password="pass")
@@ -32,7 +34,7 @@ def test_promote_from_waitlist_happy_path():
         organizer= organizer
     )
 
-    u4 = CustomUser.objects.create_user(email="u4@example.com", password="pass")
+    u4 = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     Reservation.objects.create(user=u1, event=event, status="confirmed")
 
@@ -69,7 +71,7 @@ def test_promote_from_waitlist_happy_path():
 @pytest.mark.django_db
 def test_promote_from_waitlist_no_free_slots():
 
-    organizer = CustomUser.objects.create_user(email="organizer@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     now = timezone.now()
 
@@ -83,12 +85,12 @@ def test_promote_from_waitlist_no_free_slots():
     )
 
 
-    u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
-    u2 = CustomUser.objects.create_user(email="u2@example.com", password="pass")
+    u1 = CustomUser.objects.create_user(email=unique_email(), password="pass")
+    u2 = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
-    u3 = CustomUser.objects.create_user(email="u3@example.com", password="pass")
-    u4 = CustomUser.objects.create_user(email="u4@example.com", password="pass")
-    u5 = CustomUser.objects.create_user(email="u5@example.com", password="pass")
+    u3 = CustomUser.objects.create_user(email=unique_email(), password="pass")
+    u4 = CustomUser.objects.create_user(email=unique_email(), password="pass")
+    u5 = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
 
     Reservation.objects.create(user=u1, event=event, status="confirmed")

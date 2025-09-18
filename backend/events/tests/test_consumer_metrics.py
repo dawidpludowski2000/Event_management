@@ -13,13 +13,18 @@ from config.asgi import application
 from users.models import CustomUser
 from events.models import Event
 
+from tests.utils import unique_email
+
+
+
+
 
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
 async def test_ws_connects_ok():
 
     organizer = await database_sync_to_async(CustomUser.objects.create_user)(
-    email="org@example.com", password="pass"
+    email=unique_email(), password="pass"
     )
 
     
@@ -50,7 +55,7 @@ async def test_ws_connects_ok():
 async def test_ws_metrics_broadcasts_json():
     
     organizer = await sync_to_async(CustomUser.objects.create_user)(
-    email="org@example.com", password="pass"
+    email=unique_email(), password="pass"
 )
 
     now = timezone.now()

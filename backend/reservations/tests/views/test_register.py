@@ -7,11 +7,13 @@ from users.models import CustomUser
 from events.models import Event
 from reservations.models import Reservation
 
+from tests.utils import unique_email
+
 
 @pytest.mark.django_db
 def test_register_requires_auth():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     now = timezone.now()
 
@@ -41,7 +43,7 @@ def test_register_requires_auth():
 @pytest.mark.django_db
 def test_reservation_endpoint():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 
@@ -75,7 +77,7 @@ def test_reservation_endpoint():
 @pytest.mark.django_db
 def test_user_cannot_register_twice():
     
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 
     now = timezone.now()
@@ -108,7 +110,7 @@ def test_user_cannot_register_twice():
 @pytest.mark.django_db
 def test_register_rejects_draft_event():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 

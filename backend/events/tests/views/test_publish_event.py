@@ -7,11 +7,13 @@ from users.models import CustomUser
 from events.models import Event
 from reservations.models import Reservation
 
+from tests.utils import unique_email
+
 
 @pytest.mark.django_db
 def test_publish_event_invalid_dates_returns_400():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
 
     now = timezone.now() 
