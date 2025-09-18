@@ -25,7 +25,9 @@ def test_user_created_is_inactive_and_token_created(unique_email):
     user = CustomUser.objects.create_user(email=unique_email, password="pass")
 
 
-    user.refresh_from_db(); assert user.is_active is False
+    user.refresh_from_db()
+    
+    assert user.is_active is False
 
     assert ActivationToken.objects.filter(user=user).exists() is True
 
