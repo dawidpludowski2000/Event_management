@@ -8,8 +8,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  
-  
+
+
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
       <h1>Logowanie</h1>

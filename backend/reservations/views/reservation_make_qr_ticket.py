@@ -1,21 +1,23 @@
-import qrcode
 import io
+
+import qrcode
 from django.http import HttpResponse
+from reservations.models import Reservation
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from reservations.models import Reservation
+
 
 class ReservationTicketView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, reservation_id):
-
         try:
-            reservation = Reservation.objects.get(id=reservation_id, user=request.user, status="confirmed")
-        
+            reservation = Reservation.objects.get(
+                id=reservation_id, user=request.user, status="confirmed"
+            )
+
         except Reservation.DoesNotExist:
             return HttpResponse(status=404)
-        
 
         qr_data = f"Reservation:{reservation.id}|Event:{reservation.event.title}"
         qr_img = qrcode.make(qr_data)

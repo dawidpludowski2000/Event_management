@@ -1,14 +1,14 @@
 from django.db import transaction
-from rest_framework import status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
 from events.services.organizer_permissions import IsEventOrganizer
-from reservations.models import Reservation
-from reservations.serializers.reservation_status_update import ReservationStatusUpdateSerializer
-from notifications.services.email import send_reservation_status_email
 from events.services.realtime_metrics import broadcast_event_metrics
-
+from notifications.services.email import send_reservation_status_email
+from reservations.models import Reservation
+from reservations.serializers.reservation_status_update import (
+    ReservationStatusUpdateSerializer,
+)
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class ReservationStatusUpdateView(APIView):
@@ -16,9 +16,13 @@ class ReservationStatusUpdateView(APIView):
 
     def patch(self, request, reservation_id: int):
         try:
-            reservation = Reservation.objects.select_related("event").get(id=reservation_id)
+            reservation = Reservation.objects.select_related("event").get(
+                id=reservation_id
+            )
         except Reservation.DoesNotExist:
-            return Response({"detail": "Zgłoszenie nie istnieje."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Zgłoszenie nie istnieje."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # Nie pozwalamy zmieniać statusu zakończonych zgłoszeń
         if reservation.status in ["confirmed", "rejected"]:
@@ -27,7 +31,9 @@ class ReservationStatusUpdateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = ReservationStatusUpdateSerializer(instance=reservation, data=request.data, partial=True)
+        serializer = ReservationStatusUpdateSerializer(
+            instance=reservation, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         new_status = serializer.validated_data.get("status")
 
@@ -38,7 +44,9 @@ class ReservationStatusUpdateView(APIView):
             ).count()
             if confirmed_count >= reservation.event.seats_limit:
                 return Response(
-                    {"detail": "Brak wolnych miejsc (limit potwierdzonych osiągnięty)."},
+                    {
+                        "detail": "Brak wolnych miejsc (limit potwierdzonych osiągnięty)."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -61,6 +69,9 @@ class ReservationStatusUpdateView(APIView):
         broadcast_event_metrics(reservation.event)
 
         return Response(
-            {"detail": f"Status zgłoszenia został zmieniony na '{new_status}'.", "status": new_status},
+            {
+                "detail": f"Status zgłoszenia został zmieniony na '{new_status}'.",
+                "status": new_status,
+            },
             status=200,
         )

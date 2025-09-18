@@ -1,7 +1,8 @@
 # events/permissions.py
-from rest_framework.permissions import BasePermission
-from reservations.models import Reservation
 from events.models import Event
+from reservations.models import Reservation
+from rest_framework.permissions import BasePermission
+
 
 class IsEventOrganizer(BasePermission):
     message = "Nie jesteś organizatorem tego wydarzenia."
@@ -21,10 +22,11 @@ class IsEventOrganizer(BasePermission):
         reservation_id = view.kwargs.get("reservation_id")
         if reservation_id is not None:
             try:
-                res = (Reservation.objects
-                       .select_related("event")
-                       .only("id", "event__organizer_id")
-                       .get(pk=reservation_id))
+                res = (
+                    Reservation.objects.select_related("event")
+                    .only("id", "event__organizer_id")
+                    .get(pk=reservation_id)
+                )
             except Reservation.DoesNotExist:
                 return False
             view._reservation = res

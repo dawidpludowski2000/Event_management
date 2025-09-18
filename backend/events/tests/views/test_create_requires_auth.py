@@ -1,12 +1,13 @@
-import pytest
-from rest_framework.test import APIClient
-from events.models import Event
-from django.utils import timezone
 from datetime import timedelta
+
+import pytest
+from django.utils import timezone
+from events.models import Event
+from rest_framework.test import APIClient
+
 
 @pytest.mark.django_db
 def test_create_event_requires_auth_returns_401():
-    
     client = APIClient()
     payload = {
         "title": "Unauthorized Event",
@@ -16,7 +17,6 @@ def test_create_event_requires_auth_returns_401():
         "seats_limit": 10,
     }
 
-    
     resp = client.post("/api/events/organizer/events/create/", payload, format="json")
 
     initial = Event.objects.count()

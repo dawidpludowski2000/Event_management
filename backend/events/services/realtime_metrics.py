@@ -4,6 +4,7 @@ from channels.layers import get_channel_layer
 from django.db.models import Count, Q
 from reservations.models import Reservation
 
+
 def broadcast_event_metrics(event):
     """
     Policz i wyślij do grupy event_<id>:

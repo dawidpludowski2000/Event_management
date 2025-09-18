@@ -37,8 +37,8 @@ export default function EventsPage() {
       });
   }, [router]);
 
-  
-  
+
+
   return (
     <div style={{ position: "relative" }}>
       {/* Wyloguj w prawym górnym rogu */}

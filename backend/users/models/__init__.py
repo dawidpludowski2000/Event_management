@@ -1,2 +1,2 @@
-from .user import CustomUser
-from .activation_token import ActivationToken
+from .activation_token import ActivationToken as ActivationToken
+from .user import CustomUser as CustomUser
