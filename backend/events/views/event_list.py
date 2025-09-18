@@ -1,8 +1,9 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from events.models.event import Event
 from events.serializers.event_list import EventListSerializer
 from rest_framework.pagination import PageNumberPagination
+
 
 
 class EventListPagination(PageNumberPagination):
@@ -18,4 +19,4 @@ class EventListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["start_time", "location", "organizer"]
     pagination_class = EventListPagination
-    permission_classes = []  
+    permission_classes = [permissions.AllowAny]  
