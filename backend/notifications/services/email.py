@@ -58,6 +58,14 @@ def send_reservation_status_email(
     SRP: złożyć i wysłać wiadomość o zmianie statusu rezerwacji.
     Jeśli status == "confirmed", dołącza plik event.ics (Add to Calendar).
     """
+
+    # --- SOFT GUARD: brak SMTP → nie wysyłaj, ale nie wysadzaj aplikacji ---
+    # Testy z locmem backendem dalej przejdą (override_settings w testach).
+    if str(getattr(settings, "EMAIL_BACKEND", "")).endswith("smtp.EmailBackend"):
+        if not getattr(settings, "EMAIL_HOST", None) or not getattr(settings, "EMAIL_HOST_USER", None):
+            print("[MAIL][WARN] Missing SMTP config (EMAIL_HOST/EMAIL_HOST_USER). Skipping send.")
+            return
+
     status = (status or "").strip().lower()
 
     label_map = {"confirmed": "potwierdzona", "rejected": "odrzucona", "pending": "oczekująca"}
@@ -94,3 +102,4 @@ def send_reservation_status_email(
         msg.attach(filename="event.ics", content=ics, mimetype="text/calendar")
 
     msg.send(fail_silently=False)
+
