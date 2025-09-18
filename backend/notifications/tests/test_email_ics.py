@@ -6,7 +6,6 @@ from notifications.services.email import build_event_ics
 
 @pytest.mark.django_db
 def test_build_event_ics_has_required_fields():
-
     title = "Event X"
     location = "Online"
     uid = "user@example.com-EventX-20250905T100000"
@@ -27,7 +26,6 @@ def test_build_event_ics_has_required_fields():
 
 @pytest.mark.django_db
 def test_build_event_ics_has_full_structure():
-
     start = datetime(2025, 9, 5, 10, 0, 0)
     end = datetime(2025, 9, 5, 12, 0, 0)
 

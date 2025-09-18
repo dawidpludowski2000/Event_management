@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/lib/config";
 
-// token automatycznie pobierany, inne funkcje nie muszą go przyjmować, automatyzacja 
+// token automatycznie pobierany, inne funkcje nie muszą go przyjmować, automatyzacja
 export async function authFetch(
   path: string,
   options: RequestInit = {}

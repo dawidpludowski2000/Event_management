@@ -4,16 +4,14 @@ from unittest.mock import patch
 import pytest
 from django.utils import timezone
 from events.models import Event
-from tests.utils import unique_email
-from users.models.user import CustomUser
-
 from reservations.models import Reservation
 from reservations.services.waitlist_service import promote_from_waitlist_fill
+from tests.utils import unique_email
+from users.models.user import CustomUser
 
 
 @pytest.mark.django_db
 def test_promote_from_waitlist_happy_path():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -75,7 +73,6 @@ def test_promote_from_waitlist_happy_path():
 
 @pytest.mark.django_db
 def test_promote_from_waitlist_no_free_slots():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     now = timezone.now()

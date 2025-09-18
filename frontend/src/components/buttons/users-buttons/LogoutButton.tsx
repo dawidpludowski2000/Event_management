@@ -7,8 +7,8 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    logout();                
-    router.push("/login");   
+    logout();
+    router.push("/login");
   };
 
   return (

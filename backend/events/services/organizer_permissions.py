@@ -1,8 +1,7 @@
 # events/permissions.py
+from events.models import Event
 from reservations.models import Reservation
 from rest_framework.permissions import BasePermission
-
-from events.models import Event
 
 
 class IsEventOrganizer(BasePermission):

@@ -1,5 +1,4 @@
 from django.urls import path
-
 from events.views.available_places_to_event import EventAvailablePlacesView
 from events.views.event_cancel import CancelEventView
 from events.views.event_create import EventCreateView

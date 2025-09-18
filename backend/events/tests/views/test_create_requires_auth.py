@@ -8,7 +8,6 @@ from rest_framework.test import APIClient
 
 @pytest.mark.django_db
 def test_create_event_requires_auth_returns_401():
-
     client = APIClient()
     payload = {
         "title": "Unauthorized Event",

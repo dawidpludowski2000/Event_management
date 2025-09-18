@@ -6,13 +6,11 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class EventListPagination(PageNumberPagination):
-
     page_size = 20
     page_size_query_param = "page_size"
 
 
 class EventListView(generics.ListAPIView):
-
     queryset = Event.objects.filter(status="published").order_by("start_time")
     serializer_class = EventListSerializer
     filter_backends = [DjangoFilterBackend]

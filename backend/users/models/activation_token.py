@@ -5,7 +5,6 @@ from django.utils import timezone
 
 
 class ActivationToken(models.Model):
-
     user = models.ForeignKey(
         "users.CustomUser", on_delete=models.CASCADE, related_name="activation_token"
     )

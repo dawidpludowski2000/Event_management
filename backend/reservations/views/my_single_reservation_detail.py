@@ -1,23 +1,19 @@
 from events.models import Event
+from reservations.models import Reservation
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from reservations.models import Reservation
-
 
 class MySingleReservationDetailView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id):
-
         try:
             event = Event.objects.get(id=event_id)
 
         except Event.DoesNotExist:
-
             return Response(
                 {"detail": "Event not found."}, status=status.HTTP_404_NOT_FOUND
             )

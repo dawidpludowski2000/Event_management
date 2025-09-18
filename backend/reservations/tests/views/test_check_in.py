@@ -12,7 +12,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_checkin_requires_confirmed_status():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -46,7 +45,6 @@ def test_checkin_requires_confirmed_status():
 
 @pytest.mark.django_db
 def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -99,7 +97,6 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
 @pytest.mark.django_db
 def test_checkin_forbidden_for_non_organizer():
-
     organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")

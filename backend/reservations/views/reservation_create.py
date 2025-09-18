@@ -2,20 +2,17 @@ import logging
 
 from events.models.event import Event
 from events.services.realtime_metrics import broadcast_event_metrics
+from reservations.serializers.reservation_create import ReservationCreateSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from reservations.serializers.reservation_create import ReservationCreateSerializer
-
 
 class ReservationCreateView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def post(self, request, event_id):
-
         try:
             event = Event.objects.get(id=event_id)
         except Event.DoesNotExist:
@@ -28,7 +25,6 @@ class ReservationCreateView(APIView):
         )
 
         if not serializer.is_valid():
-
             logger = logging.getLogger(__name__)
 
             logger.warning(

@@ -15,7 +15,6 @@ from users.models import CustomUser
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
 async def test_ws_connects_ok():
-
     organizer = await database_sync_to_async(CustomUser.objects.create_user)(
         email=unique_email(), password="pass"
     )
@@ -44,7 +43,6 @@ async def test_ws_connects_ok():
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_ws_metrics_broadcasts_json():
-
     organizer = await sync_to_async(CustomUser.objects.create_user)(
         email=unique_email(), password="pass"
     )

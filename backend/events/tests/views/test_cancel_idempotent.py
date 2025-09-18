@@ -12,7 +12,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_cancel_event_twice_second_call_200_no_changes():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -51,7 +50,6 @@ def test_cancel_event_twice_second_call_200_no_changes():
     assert Reservation.objects.filter(event=event, status="rejected").count() == 3
 
     with patch("events.views.event_cancel.broadcast_event_metrics"):
-
         client.post(f"/api/events/organizer/{event.id}/cancel/")
 
     assert resp.status_code == 200

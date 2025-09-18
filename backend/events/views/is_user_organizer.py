@@ -5,11 +5,9 @@ from rest_framework.views import APIView
 
 
 class IsUserOrganizerView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
         is_organizer = Event.objects.filter(organizer=request.user).exists()
 
         return Response({"is_organizer": is_organizer})

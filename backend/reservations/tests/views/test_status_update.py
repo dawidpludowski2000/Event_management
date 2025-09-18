@@ -12,7 +12,6 @@ from users.models import CustomUser
 
 @pytest.mark.django_db
 def test_confirm_blocked_when_full_returns_400_and_no_side_effects():
-
     organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
@@ -45,7 +44,6 @@ def test_confirm_blocked_when_full_returns_400_and_no_side_effects():
             "reservations.views.reservation_status_update.send_reservation_status_email"
         ) as mail_mock,
     ):
-
         resp = client.patch(
             f"/api/reservations/{res.id}/status/",
             data={"status": "confirmed"},
