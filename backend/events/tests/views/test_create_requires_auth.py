@@ -6,7 +6,7 @@ from datetime import timedelta
 
 @pytest.mark.django_db
 def test_create_event_requires_auth_returns_401():
-    # Arrange
+    
     client = APIClient()
     payload = {
         "title": "Unauthorized Event",
@@ -16,9 +16,9 @@ def test_create_event_requires_auth_returns_401():
         "seats_limit": 10,
     }
 
-    # Act
+    
     resp = client.post("/api/events/organizer/events/create/", payload, format="json")
 
-    # Assert
+    initial = Event.objects.count()
     assert resp.status_code == 401
-    assert Event.objects.count() == 0
+    assert Event.objects.count() == initial

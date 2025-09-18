@@ -12,15 +12,17 @@ from events.models import Event
 from reservations.models import Reservation
 
 
+
+
 @pytest.mark.django_db
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     DEFAULT_FROM_EMAIL="test@example.com",
 )
-def test_user_created_is_inactive_and_token_created():
+def test_user_created_is_inactive_and_token_created(unique_email):
 
 
-    user = CustomUser.objects.create_user(email="u@example.com", password="pass")
+    user = CustomUser.objects.create_user(email=unique_email, password="pass")
 
 
     user.refresh_from_db(); assert user.is_active is False
@@ -33,9 +35,9 @@ def test_user_created_is_inactive_and_token_created():
     DEFAULT_FROM_EMAIL="test@example.com",
 )
 @pytest.mark.django_db
-def test_activate_endpoint_sets_active_and_removes_tokens():
+def test_activate_endpoint_sets_active_and_removes_tokens(unique_email):
     
-    user = CustomUser.objects.create_user(email="u@example.com", password="pass")  # signal: inactive + token
+    user = CustomUser.objects.create_user(email=unique_email, password="pass")  # signal: inactive + token
     tok = ActivationToken.objects.get(user=user)
 
     client = APIClient()
@@ -54,9 +56,9 @@ def test_activate_endpoint_sets_active_and_removes_tokens():
     DEFAULT_FROM_EMAIL="test@example.com",
 )
 @pytest.mark.django_db
-def test_activate_with_invalid_token_returns_400():
+def test_activate_with_invalid_token_returns_400(unique_email):
     
-    user = CustomUser.objects.create_user(email="u@example.com", password="pass")
+    user = CustomUser.objects.create_user(email=unique_email, password="pass")
     client = APIClient()
 
     fake_token = uuid.uuid4()  # poprawny format UUID, ale nie istnieje w DB

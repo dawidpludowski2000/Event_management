@@ -7,11 +7,13 @@ from users.models import CustomUser
 from events.models import Event
 from reservations.models import Reservation
 
+from tests.utils import unique_email
+
 
 @pytest.mark.django_db
 def test_checkin_requires_confirmed_status():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 
@@ -50,7 +52,7 @@ def test_checkin_requires_confirmed_status():
 @pytest.mark.django_db
 def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
 

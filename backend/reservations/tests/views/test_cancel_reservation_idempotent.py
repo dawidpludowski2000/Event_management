@@ -8,11 +8,13 @@ from users.models import CustomUser
 from events.models import Event
 from reservations.models import Reservation
 
+from tests.utils import unique_email
+
 
 @pytest.mark.django_db
 def test_cancel_reservation_twice_second_call_404():
 
-    organizer = CustomUser.objects.create_user(email="org@example.com", password="pass")
+    organizer = CustomUser.objects.create_user(email=unique_email(), password="pass")
 
     u1 = CustomUser.objects.create_user(email="u1@example.com", password="pass")
     
