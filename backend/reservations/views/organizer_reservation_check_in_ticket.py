@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from reservations.models import Reservation
+import logging
 
 from events.services.realtime_metrics import broadcast_event_metrics
 
@@ -40,7 +41,9 @@ class OrganizerReservationCheckInView(APIView):
         reservation.checked_in = True
         reservation.save(update_fields=["checked_in"])
         
-        print("[DEBUG] Check-in OK, broadcast zaraz pójdzie dla event", reservation.event.id)
+        logger = logging.getLogger(__name__)
+
+        logger.info("Check-in OK; broadcasting metrics for event %s", reservation.event.id)
 
         broadcast_event_metrics(reservation.event)
 

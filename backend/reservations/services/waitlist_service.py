@@ -2,6 +2,7 @@
 from django.db import transaction, connection
 from reservations.models import Reservation
 from notifications.services.email import send_reservation_status_email
+import logging
 
 
 def promote_from_waitlist_fill(event):
@@ -71,7 +72,10 @@ def promote_from_waitlist_fill(event):
             )
         except Exception as e:
             # Nie blokuj całego procesu kolejki, jeśli mail padnie
-            # (logi możesz dodać do Sentry w wersji prod)
-            print(f"[WAITLIST][MAIL][WARN] {r.user.email}: {e}")
+
+            logger = logging.getLogger(__name__)
+
+            logger.warning("[WAITLIST][MAIL] %s", e)
+
 
     return to_promote

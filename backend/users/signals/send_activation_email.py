@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
 from users.models import CustomUser, ActivationToken
+import logging
 
 @receiver(post_save, sender=CustomUser)
 def send_activation_email(sender, instance, created, **kwargs):
@@ -28,4 +29,6 @@ def send_activation_email(sender, instance, created, **kwargs):
         fail_silently=False,
     )
 
-    print(f"[SIGNAL] Mail aktywacyjny wysłany do {instance.email}")
+    logger = logging.getLogger(__name__)
+
+    logger.info("[SIGNAL] Activation email queued for %s", instance.email)
