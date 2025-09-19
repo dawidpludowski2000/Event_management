@@ -37,8 +37,11 @@ jobs:
           # Dev tools for CI (even if not in requirements.txt)
           pip install pytest pytest-cov ruff==0.6.9 black==24.8.0 isort==5.13.2
 
-      - name: Ruff (lint)
-        run: ruff check .
+      - name: Ruff (lint & fix)
+        run: |
+        ruff check . --fix
+        ruff format .
+
 
       - name: Black (format check)
         run: black --check .
