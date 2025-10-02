@@ -1,24 +1,62 @@
 services:
-  redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
-    ports:
-      - "6379:6379"
-
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+    container_name: eventflow-backend
     environment:
       DJANGO_SECRET_KEY: dev-insecure-key
       DEBUG: "True"
-      ALLOWED_HOSTS: "*"
-      REDIS_URL: redis://redis:6379/0
-      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
-      DEFAULT_FROM_EMAIL: "EventFlow <no-reply@example.com>"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:3000"
+      REDIS_URL: "redis://redis:6379/0"
+      EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+      DEFAULT_FROM_EMAIL: "no-reply@example.com"
+    ports:
+      - "8000:8000"
     depends_on:
-      - redis
+      redis:
+        condition: service_started
     volumes:
       - ./backend:/app
+    working_dir: /app
+    command: >
+      sh -c "
+        python -m pip install --upgrade pip &&
+        pip install -r requirements.txt &&
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: eventflow-frontend
+    working_dir: /app
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:8000"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_DISABLE_LIGHTNINGCSS: "1"
+      TAILWIND_DISABLE_OXIDE: "1"
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./frontend:/app
+      # osobny volume na node_modules, żeby mount kodu nie nadpisał instalacji
+      - /app/node_modules
+    command: >
+      sh -c "rm -f package-lock.json &&
+             npm install --package-lock-only &&
+             npm ci --include=optional --no-audit --no-fund &&
+             npm run dev -- -p 3000 -H 0.0.0.0"
+
+  redis:
+    image: redis:7-alpine
+    container_name: eventflow-redis
+    ports:
+      - "6379:6379"
