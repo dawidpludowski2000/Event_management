@@ -5,10 +5,11 @@ import dynamic from "next/dynamic";
 import { checkInReservation } from "@/lib/api/reservations";
 
 // Dynamiczny import skanera (SSR off). Typy „any”, bo biblioteka bywa kapryśna w TS.
-const QrReader: any = dynamic(
-  () => import("react-qr-reader").then((m: any) => m.QrReader ?? m.default),
+const Scanner: any = dynamic(
+  () => import("@yudiel/react-qr-scanner").then((m: any) => m.Scanner ?? m.default),
   { ssr: false, loading: () => <p>Ładowanie skanera…</p> }
 );
+
 
 type Props = {
   /** Wywoływane po udanym check-in (lub po symulacji). Użyj np. do refetch listy/metryk. */
@@ -75,12 +76,14 @@ export default function QRScannerCheckIn({
   };
 
   // Callback z kamery (biblioteka różnie zwraca wynik – obsługujemy kilka kształtów)
-  const handleResult = async (result: any, err: any) => {
-    if (err) return; // normalne na „pustych” klatkach
-    const text = result?.getText ? result.getText() : result?.text || result;
-    if (!text || typeof text !== "string") return;
-    await processText(text);
-  };
+  const handleScan = async (results: any) => {
+  if (!results) return;
+  // biblioteka zwraca tablicę wykrytych kodów
+  const first = Array.isArray(results) ? results[0] : results;
+  const text = first?.rawValue ?? first?.text ?? "";
+  if (!text) return;
+  await processText(text);
+};
 
   return (
     <div>
@@ -101,10 +104,10 @@ export default function QRScannerCheckIn({
             {error ? "❌ " + error : "🎥 Kamera aktywna — pokaż kod QR"}
           </p>
 
-          <QrReader
+          <Scanner
             constraints={{ facingMode: "environment" }}
-            onResult={handleResult}
-            videoStyle={{ width: "100%" }}
+            onScan={handleScan}
+            onError={() => {}}
           />
 
           {lastText && (
