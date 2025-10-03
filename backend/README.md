@@ -1,6 +1,6 @@
 # EventFlow
 
-Krótki projekt do zarządzania wydarzeniami: rejestracja użytkowników, tworzenie wydarzeń przez organizatorów, kolejka oczekujących, QR-bilety i metryki w czasie rzeczywistym.
+Projekt do zarządzania wydarzeniami: rejestracja użytkowników, tworzenie wydarzeń przez organizatorów, kolejka oczekujących, QR-bilety i metryki w czasie rzeczywistym.
 
 ## Funkcjonalności (skrót)
 - Rejestracja/logowanie (JWT)

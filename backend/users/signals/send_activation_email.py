@@ -4,7 +4,9 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from users.models import ActivationToken, CustomUser
+
+from users.models.user import CustomUser
+from users.models.activation_token import ActivationToken
 
 
 @receiver(post_save, sender=CustomUser)

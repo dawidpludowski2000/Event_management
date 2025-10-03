@@ -176,19 +176,23 @@ SPECTACULAR_SETTINGS = {
 
 load_dotenv()
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST")
+# --- EMAIL ---
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"  # domyślnie konsola
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "EventFlow <no-reply@example.com>")
 
-# (opcjonalnie) twarde sprawdzenie, że .env się wczytał:
+# W trybie DEV (DEBUG=True) wymuś konsolę niezależnie od env
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-if EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
-    if not EMAIL_HOST or not EMAIL_HOST_USER:
-        raise RuntimeError("Brakuje konfiguracji e-mail (sprawdź .env i load_dotenv).")
+
 
 
 REDIS_URL = os.getenv("REDIS_URL")
@@ -215,10 +219,6 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
-
-
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 
