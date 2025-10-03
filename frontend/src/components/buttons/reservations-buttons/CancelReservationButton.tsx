@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { cancelReservation } from "@/lib/api/reservations";
+import { toast } from "react-hot-toast";
 
 interface CancelReservationButtonProps {
   reservationId: number;
@@ -12,28 +12,21 @@ export default function CancelReservationButton({
   reservationId,
   onSuccess,
 }: CancelReservationButtonProps) {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
   const handleCancel = async () => {
-    const res = await cancelReservation(reservationId);
+    try {
+      const res = await cancelReservation(reservationId);
 
-    if (res.ok) {
-      setSuccess("Rezerwacja została anulowana.");
-      setError("");
-      onSuccess();
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setError(data.detail || "Nie udało się anulować rezerwacji.");
-      setSuccess("");
+      if (res.ok) {
+        toast.success("Rezerwacja została anulowana.");
+        onSuccess();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.detail || "Nie udało się anulować rezerwacji.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Błąd połączenia z serwerem.");
     }
   };
 
-  return (
-    <>
-      <button onClick={handleCancel}>Anuluj rezerwację</button>
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </>
-  );
+  return <button onClick={handleCancel}>Anuluj rezerwację</button>;
 }
