@@ -67,12 +67,18 @@ export default function MyReservationsPage() {
   </div>
 
   {/* pod spodem */}
+    {/* pod spodem */}
+    {/* pod spodem */}
+    {/* pod spodem */}
   <div style={{ marginTop: "8px" }}>
     <CancelReservationButton
       reservationId={res.reservation_id}
       onSuccess={fetchReservations}
     />
   </div>
+
+
+
 </li>
 
         ))}
