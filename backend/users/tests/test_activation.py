@@ -8,7 +8,7 @@ from django.utils import timezone
 from events.models import Event
 from reservations.models import Reservation
 from rest_framework.test import APIClient
-from users.models import CustomUser
+from users.models.user import CustomUser
 from users.models.activation_token import ActivationToken
 
 
