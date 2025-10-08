@@ -224,24 +224,30 @@ LOGGING = {
 
 
 
+# --- Logging (text vs JSON) ---
+LOG_JSON = os.getenv("LOG_JSON", "False") == "True"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "request_id": {"()": "config.logging.RequestIDLogFilter"},
+    },
     "formatters": {
         "verbose": {
-            "format": "[{levelname}] {asctime} {name}: {message}",
+            "format": "[{levelname}] {asctime} {name} rid={request_id} : {message}",
             "style": "{",
         },
         "json": {
-            "format": '{{"time": "{asctime}", "level": "{levelname}", "name": "{name}", "message": "{message}"}}',
+            "format": '{{"time":"{asctime}","level":"{levelname}","logger":"{name}","rid":"{request_id}","msg":"{message}"}}',
             "style": "{",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-            "formatter": "verbose",  # w dev 'verbose', w prod można dać 'json'
+            "filters": ["request_id"],
+            "formatter": "json" if LOG_JSON else "verbose",
         },
     },
     "root": {
