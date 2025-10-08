@@ -57,3 +57,7 @@ mm:
 
 csu:
 	$(DC) exec backend python manage.py createsuperuser
+
+
+seed:
+	$(DC) exec backend python scripts/seed_demo.py
