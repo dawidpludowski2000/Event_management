@@ -249,3 +249,17 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+
+# --- Security headers (prod) ---
+ENABLE_SECURE_HEADERS = os.getenv("ENABLE_SECURE_HEADERS", "False") == "True"
+
+if ENABLE_SECURE_HEADERS:
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True") == "True"
+    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True") == "True"
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))  # 1 rok
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "True") == "True"
+    SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "True") == "True"
+    SECURE_REFERRER_POLICY = os.getenv("SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin")
+    X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY")
