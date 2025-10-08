@@ -1,5 +1,7 @@
 import uuid
 from django.utils.deprecation import MiddlewareMixin
+from config.logging import request_id_var
+
 
 class RequestIDMiddleware(MiddlewareMixin):
     """
@@ -14,6 +16,7 @@ class RequestIDMiddleware(MiddlewareMixin):
         if not rid:
             rid = str(uuid.uuid4())
         request.request_id = rid
+        request_id_var.set(rid)
         return None
 
     def process_response(self, request, response):
