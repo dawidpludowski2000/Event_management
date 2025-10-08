@@ -177,6 +177,19 @@ SPECTACULAR_SETTINGS = {
 
 load_dotenv()
 
+# --- App version / build meta ---
+APP_VERSION = os.getenv("APP_VERSION")
+if not APP_VERSION:
+    try:
+        with open(BASE_DIR / "VERSION", "r", encoding="utf-8") as f:
+            APP_VERSION = f.read().strip()
+    except Exception:
+        APP_VERSION = "0.0.0"
+
+GIT_COMMIT = os.getenv("GIT_COMMIT", "")
+BUILD_TIME = os.getenv("BUILD_TIME", "")  # np. 2025-10-08T12:34:56Z (ustawiane w CI)
+
+
 # --- EMAIL ---
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
