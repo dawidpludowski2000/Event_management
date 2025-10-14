@@ -1,11 +1,21 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { updateOrganizerEvent } from "@/lib/api/events";
 
 export default function OrganizerEditMyEventsPage() {
+  // Page (wrapper) NIE używa useSearchParams bezpośrednio — tylko opakowuje Suspense.
+  return (
+    <Suspense fallback={<p>⏳ Ładowanie…</p>}>
+      <EditEventForm />
+    </Suspense>
+  );
+}
+
+function EditEventForm() {
   const router = useRouter();
-  const sp = useSearchParams();
+  const sp = useSearchParams(); 
   const eventId = Number(sp.get("eventId"));
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,16 +40,18 @@ export default function OrganizerEditMyEventsPage() {
       return;
     }
 
-    const payload: any = {};
+    const payload: Record<string, unknown> = {};
     if (start) payload.start_time = new Date(start).toISOString();
-    if (end)   payload.end_time   = new Date(end).toISOString();
+    if (end) payload.end_time = new Date(end).toISOString();
     if (description) payload.description = description;
 
     try {
       await updateOrganizerEvent(eventId, payload);
       router.push("/organizer-reservation");
-    } catch (err: any) {
-      alert(err?.message || "Błąd edycji wydarzenia.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Błąd edycji wydarzenia.";
+      alert(message);
       console.error(err);
     }
   };
