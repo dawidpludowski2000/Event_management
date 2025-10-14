@@ -288,3 +288,26 @@ if ENABLE_SECURE_HEADERS:
     SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "True") == "True"
     SECURE_REFERRER_POLICY = os.getenv("SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin")
     X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY")
+
+
+
+# --- Sentry (optional) ---
+SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0")),
+            profiles_sample_rate=float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.0")),
+            send_default_pii=True,
+            environment=os.getenv("SENTRY_ENVIRONMENT", "local"),
+            release=os.getenv("APP_VERSION", "0.0.0"),
+        )
+    except Exception as e:
+        # Nie wysadzamy aplikacji jeśli coś jest nie tak z Sentry
+        import logging
+        logging.getLogger(__name__).warning("Sentry init skipped: %s", e)
