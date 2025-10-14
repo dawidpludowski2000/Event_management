@@ -311,3 +311,12 @@ if SENTRY_DSN:
         # Nie wysadzamy aplikacji jeśli coś jest nie tak z Sentry
         import logging
         logging.getLogger(__name__).warning("Sentry init skipped: %s", e)
+
+
+# --- Sentry (observability) ---
+try:
+    from config.sentry import init_sentry
+    init_sentry()
+except Exception as _sentry_init_err:
+    import logging
+    logging.getLogger(__name__).warning("Sentry init error: %s", _sentry_init_err)
