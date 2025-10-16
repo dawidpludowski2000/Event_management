@@ -7,50 +7,41 @@ from rest_framework.exceptions import ValidationError, PermissionDenied, NotAuth
 
 def custom_exception_handler(exc, context):
     """
-    Global JSON error handler – returns uniform error responses.
+    Global JSON exception handler – unified error format.
     """
-    response = exception_handler(exc, context)
+    drf_response = exception_handler(exc, context)
 
+    # Standardowe wyjątki Django/DRF
     if isinstance(exc, Http404):
-        return Response(
-            {"success": False, "message": "Not found", "errors": None},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        return _error("Not found", status.HTTP_404_NOT_FOUND)
 
     if isinstance(exc, NotAuthenticated):
-        return Response(
-            {"success": False, "message": "Authentication required", "errors": None},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
+        return _error("Authentication required", status.HTTP_401_UNAUTHORIZED)
 
     if isinstance(exc, PermissionDenied):
-        return Response(
-            {"success": False, "message": "Permission denied", "errors": None},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+        return _error("Permission denied", status.HTTP_403_FORBIDDEN)
 
     if isinstance(exc, ValidationError):
-        return Response(
-            {
-                "success": False,
-                "message": "Validation error",
-                "errors": exc.detail,
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        return _error("Validation error", status.HTTP_400_BAD_REQUEST, exc.detail)
 
-    if response is not None:
-        return Response(
-            {
-                "success": False,
-                "message": response.data.get("detail", "Server error"),
-                "errors": None,
-            },
-            status=response.status_code,
-        )
+    # Reszta wyjątków obsłużona przez DRF
+    if drf_response is not None:
+        detail = drf_response.data.get("detail", "Server error")
+        return _error(detail, drf_response.status_code, drf_response.data)
 
-    # Unhandled exceptions (500)
+    # Nieobsłużone błędy (500)
+    return _error("Internal server error", status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def _error(message, status_code, errors=None):
+    """
+    Helper to return a unified error JSON response.
+    """
     return Response(
-        {"success": False, "message": "Internal server error", "errors": None},
-        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        {
+            "success": False,
+            "message": message,
+            "errors": errors or {},
+        },
+        status=status_code,
     )
