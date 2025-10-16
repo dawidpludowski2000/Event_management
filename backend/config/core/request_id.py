@@ -1,6 +1,6 @@
 import uuid
 from django.utils.deprecation import MiddlewareMixin
-from config.logging import request_id_var
+from backend.config.core.logging import request_id_var
 
 class RequestIDMiddleware(MiddlewareMixin):
     """

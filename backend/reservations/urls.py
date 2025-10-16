@@ -1,5 +1,5 @@
 from django.urls import path
-from reservations.views.cancel_my_reservation import CancelMyReservation
+from reservations.views.cancel_my_reservation import CancelMyReservationView
 from reservations.views.my_reservation import MyReservationsView
 from reservations.views.my_single_reservation_detail import (
     MySingleReservationDetailView,
@@ -52,7 +52,7 @@ urlpatterns = [
     # Anulowanie własnej rezerwacji
     path(
         "reservations/<int:reservation_id>/",
-        CancelMyReservation.as_view(),
+        CancelMyReservationView.as_view(),
         name="cancel-my-reservation",
     ),
     # Pobranie biletu QR

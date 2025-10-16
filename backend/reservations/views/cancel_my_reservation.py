@@ -1,38 +1,30 @@
-from django.core.exceptions import PermissionDenied
-from events.services.realtime_metrics import broadcast_event_metrics
-from reservations.models.reservation import Reservation
-from reservations.services.waitlist_service import promote_from_waitlist_fill
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from reservations.models import Reservation
+from common.exceptions import raise_validation
 
 
-class CancelMyReservation(APIView):
-    permission_classes = [IsAuthenticated]
+class CancelMyReservationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, reservation_id):
         try:
-            reservation = Reservation.objects.get(id=reservation_id)
-
+            reservation = Reservation.objects.get(id=reservation_id, user=request.user)
         except Reservation.DoesNotExist:
-            return Response(
-                {"detail": "Rezerwacja nie istnieje."}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise_validation("Nie masz takiej rezerwacji lub już została anulowana.")
 
-        if reservation.user != request.user:
-            raise PermissionDenied("Nie masz uprawnień do anulowania tej rezerwacji.")
+        if reservation.status == "cancelled":
+            raise_validation("Rezerwacja została już anulowana.")
 
-        was_confirmed = reservation.status == "confirmed"
-        event = reservation.event
-
-        reservation.delete()
-
-        if was_confirmed:
-            promote_from_waitlist_fill(event)
-
-        broadcast_event_metrics(event)
+        reservation.status = "cancelled"
+        reservation.save(update_fields=["status"])
 
         return Response(
-            {"detail": "Rezerwacja została anulowana."}, status=status.HTTP_200_OK
+            {
+                "success": True,
+                "message": "Rezerwacja została anulowana.",
+                "data": {"reservation_id": reservation_id},
+            },
+            status=status.HTTP_200_OK,
         )
