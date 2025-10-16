@@ -72,6 +72,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.request_id.RequestIDMiddleware",
+
+    #"config.middleware.response_wrapper.ResponseWrapperMiddleware",
+
 ]
 
 # CORS
@@ -175,6 +178,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 
     "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",
+
+    "DEFAULT_RENDERER_CLASSES": (
+        "config.renderers.EnvelopeJSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    )
 }
 
 SPECTACULAR_SETTINGS = {
