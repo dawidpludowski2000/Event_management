@@ -4,6 +4,10 @@ import json
 
 class ResponseWrapperMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
+
+        if isinstance(response.data, dict) and "success" in response.data:
+            return response
+
         if not request.path.startswith("/api/"):
             return response
 
