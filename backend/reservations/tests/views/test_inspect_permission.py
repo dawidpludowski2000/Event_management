@@ -39,12 +39,14 @@ def test_inspect_view_allows_organizer_returns_200():
 
     assert resp.status_code == 200
 
-    data = resp.json()
+    data = resp.json().get("data", {})
+    nested = data.get("data", data)  
+    assert nested.get("reservation_id") == res.id
 
-    assert data.get("reservation_id") == res.id
-    assert data.get("user_email") == u1.email
-    assert data.get("event_id") == event.id
-    assert data.get("event_title") == event.title
+    assert nested.get("user_email") == u1.email
+    assert nested.get("event_id") == event.id
+
+    assert nested.get("event_title") == event.title
 
 
 @pytest.mark.django_db

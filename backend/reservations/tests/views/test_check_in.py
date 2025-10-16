@@ -77,19 +77,21 @@ def test_checkin_confirmed_is_idempotent_and_broadcasts_once():
 
     assert resp1.status_code == 200
 
-    data1 = resp1.json()
+    data1 = resp1.json().get("data", {})
     assert data1.get("checked_in") is True
+
     assert data1.get("reservation_id") == res.id
 
     res.refresh_from_db()
     assert res.checked_in is True
 
     assert resp2.status_code == 200
-    data2 = resp2.json()
+    data2 = resp2.json().get("data", {})
     assert (
         "oznaczona" in data2.get("detail", "").lower()
         or "already" in data2.get("detail", "").lower()
     )
+
 
     res.refresh_from_db()
     assert res.checked_in is True

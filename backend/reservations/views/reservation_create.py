@@ -25,13 +25,17 @@ class ReservationCreateView(APIView):
         )
 
         if not serializer.is_valid():
-            logger = logging.getLogger(__name__)
+            errors = serializer.errors
+            detail = errors.get("detail", ["Validation error"])[0] if isinstance(errors.get("detail"), list) else errors.get("detail", "Validation error")
 
-            logger.warning(
-                "Validation error on reservation create: %s", serializer.errors
-            )
+            return Response(
+            {
+                "detail": detail,  # ← dla testów i spójności API
+                "errors": errors,  # ← oryginalne błędy
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
 
