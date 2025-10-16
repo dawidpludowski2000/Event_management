@@ -1,14 +1,14 @@
 from django.db import transaction
-from events.services.organizer_permissions import IsEventOrganizer
-from events.services.realtime_metrics import broadcast_event_metrics
-from notifications.services.email import send_reservation_status_email
-from reservations.models import Reservation
-from reservations.serializers.reservation_status_update import (
-    ReservationStatusUpdateSerializer,
-)
-from rest_framework import permissions, status
-from rest_framework.response import Response
+from rest_framework import status, permissions
 from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from events.services.organizer_permissions import IsEventOrganizer
+from reservations.models import Reservation
+from reservations.serializers.reservation_status_update import ReservationStatusUpdateSerializer
+from notifications.services.email import send_reservation_status_email
+from events.services.realtime_metrics import broadcast_event_metrics
+from common.exceptions import raise_validation  # ✅ NOWE
 
 
 class ReservationStatusUpdateView(APIView):
@@ -16,45 +16,29 @@ class ReservationStatusUpdateView(APIView):
 
     def patch(self, request, reservation_id: int):
         try:
-            reservation = Reservation.objects.select_related("event").get(
-                id=reservation_id
-            )
+            reservation = Reservation.objects.select_related("event").get(id=reservation_id)
         except Reservation.DoesNotExist:
-            return Response(
-                {"detail": "Zgłoszenie nie istnieje."}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise_validation("Rezerwacja nie istnieje.")
 
-        # Nie pozwalamy zmieniać statusu zakończonych zgłoszeń
+        # Nie można zmieniać statusu zakończonych rezerwacji
         if reservation.status in ["confirmed", "rejected"]:
-            return Response(
-                {"detail": "Nie można zmienić statusu zakończonego zgłoszenia."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise_validation("Nie można zmienić statusu zakończonego zgłoszenia.")
 
-        serializer = ReservationStatusUpdateSerializer(
-            instance=reservation, data=request.data, partial=True
-        )
+        serializer = ReservationStatusUpdateSerializer(instance=reservation, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         new_status = serializer.validated_data.get("status")
 
-        # Limit obowiązuje TYLKO przy potwierdzaniu
+        # Limit obowiązuje tylko przy potwierdzaniu rezerwacji
         if new_status == "confirmed":
-            confirmed_count = Reservation.objects.filter(
-                event=reservation.event, status="confirmed"
-            ).count()
+            confirmed_count = Reservation.objects.filter(event=reservation.event, status="confirmed").count()
             if confirmed_count >= reservation.event.seats_limit:
-                return Response(
-                    {
-                        "detail": "Brak wolnych miejsc (limit potwierdzonych osiągnięty)."
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                raise_validation("Brak wolnych miejsc (limit potwierdzonych osiągnięty).")
 
-        # Zapisz zmianę atomowo
+        # Zapisujemy zmianę atomowo
         with transaction.atomic():
             serializer.save()
 
-        # E-mail z aktualnym (NOWYM) statusem
+        # Wysyłamy maila z nowym statusem
         send_reservation_status_email(
             user_email=reservation.user.email,
             user_name=reservation.user.get_username() or reservation.user.username,
@@ -68,10 +52,8 @@ class ReservationStatusUpdateView(APIView):
 
         broadcast_event_metrics(reservation.event)
 
-        return Response(
-            {
-                "detail": f"Status zgłoszenia został zmieniony na '{new_status}'.",
-                "status": new_status,
-            },
-            status=200,
-        )
+        return Response({
+            "success": True,
+            "message": f"Status zgłoszenia został zmieniony na '{new_status}'.",
+            "data": {"status": new_status}
+        }, status=status.HTTP_200_OK)

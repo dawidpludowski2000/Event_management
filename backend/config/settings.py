@@ -71,9 +71,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "config.middleware.request_id.RequestIDMiddleware",
+    
+    "config.core.request_id.RequestIDMiddleware",
+    "config.core.response_wrapper.ResponseWrapperMiddleware",
 
-    "config.middleware.response_wrapper.ResponseWrapperMiddleware",
 
 ]
 
@@ -260,7 +261,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "filters": {
-        "request_id": {"()": "config.logging.RequestIDLogFilter"},
+        "request_id": {"()": "config.core.logging.RequestIDLogFilter"},
     },
     "formatters": {
         "verbose": {
@@ -325,7 +326,7 @@ if SENTRY_DSN:
 
 # --- Sentry (observability) ---
 try:
-    from config.sentry import init_sentry
+    from backend.config.core.sentry import init_sentry
     init_sentry()
 except Exception as _sentry_init_err:
     import logging
