@@ -73,7 +73,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.request_id.RequestIDMiddleware",
 
-    #"config.middleware.response_wrapper.ResponseWrapperMiddleware",
+    "config.middleware.response_wrapper.ResponseWrapperMiddleware",
 
 ]
 

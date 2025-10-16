@@ -93,10 +93,22 @@ def test_user_cannot_register_twice():
     assert resp2.status_code == 400
 
     data2 = resp2.json()
-    assert (
-        "już" in data2.get("detail", "").lower()
-        or "already" in data2.get("detail", "").lower()
-    )
+    
+    # najpierw próbujemy główne message
+    msg = data2.get("message", "").lower()
+
+    # jak surowy error jest w errors.detail to go bierzemy zamiast generycznego "Validation error"
+    errors = data2.get("errors", {})
+    if isinstance(errors, dict):
+        detail = errors.get("detail") or errors.get("errors", {}).get("detail")
+    if isinstance(detail, list):
+        detail = detail[0]
+    if detail:
+        msg = (msg + " " + str(detail)).lower()
+
+    assert "już" in msg or "already" in msg
+
+
 
     assert Reservation.objects.filter(user=u1, event=event).count() == 1
 

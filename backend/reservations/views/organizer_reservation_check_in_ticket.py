@@ -14,47 +14,56 @@ class OrganizerReservationCheckInView(APIView):
 
     def post(self, request, reservation_id: int):
         try:
-            reservation = Reservation.objects.select_related("event").get(
-                id=reservation_id
-            )
+            reservation = Reservation.objects.select_related("event").get(id=reservation_id)
         except Reservation.DoesNotExist:
             return Response(
-                {"detail": "Rezerwacja nie istnieje."}, status=status.HTTP_404_NOT_FOUND
+                {
+                    "success": False,
+                    "message": "Rezerwacja nie istnieje.",
+                    "detail": "Rezerwacja nie istnieje."
+                },
+                status=status.HTTP_404_NOT_FOUND
             )
 
-        # check-in tylko dla potwierdzonych
+        # Check-in tylko dla potwierdzonych
         if reservation.status != "confirmed":
             return Response(
-                {"detail": "Tylko potwierdzone rezerwacje można oznaczyć jako obecne."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "success": False,
+                    "message": "Nie można wykonać check-in.",
+                    "detail": "Tylko potwierdzone rezerwacje można oznaczyć jako obecne."
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Idempotentne — już była oznaczona
         if reservation.checked_in:
             return Response(
                 {
-                    "detail": "Ta rezerwacja jest już oznaczona jako obecna.",
-                    "checked_in": True,
-                    "reservation_id": reservation.id,
-                },
-                status=status.HTTP_200_OK,
-            )
+                "success": True,
+                "message": "Rezerwacja już wcześniej była oznaczona jako obecna.",
+                "detail": "Rezerwacja już wcześniej była oznaczona jako obecna.",
+                "checked_in": True,
+                "reservation_id": reservation.id,
+            },
+            status=status.HTTP_200_OK
+)
 
+        # Normalny check-in
         reservation.checked_in = True
         reservation.save(update_fields=["checked_in"])
 
         logger = logging.getLogger(__name__)
-
-        logger.info(
-            "Check-in OK; broadcasting metrics for event %s", reservation.event.id
-        )
+        logger.info("Check-in OK; broadcasting metrics for event %s", reservation.event.id)
 
         broadcast_event_metrics(reservation.event)
 
         return Response(
             {
-                "detail": "Check-in wykonany.",
+                "success": True,
+                "message": "Check-in wykonany.",
                 "checked_in": True,
                 "reservation_id": reservation.id,
             },
-            status=200,
+            status=status.HTTP_200_OK
         )
