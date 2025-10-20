@@ -1,3 +1,4 @@
+
 from django.db import transaction
 from events.models import Event
 from events.services.organizer_permissions import IsEventOrganizer
@@ -7,6 +8,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from config.core.api_response import success, error
+
+
 
 class CancelEventView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsEventOrganizer]
@@ -15,14 +19,10 @@ class CancelEventView(APIView):
         try:
             event = Event.objects.get(pk=event_id)
         except Event.DoesNotExist:
-            return Response(
-                {"detail": "Event nie istnieje."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return error("Event nie istnieje.", status=404)
 
         if event.status == "cancelled":
-            return Response(
-                {"detail": "Wydarzenie jest już anulowane."}, status=status.HTTP_200_OK
-            )
+            return success("Wydarzenie jest już anulowane.")
 
         with transaction.atomic():
             # 1. Anulowanie wydarzenia
@@ -36,7 +36,4 @@ class CancelEventView(APIView):
 
         broadcast_event_metrics(event)
 
-        return Response(
-            {"detail": "Wydarzenie anulowane, rezerwacje odrzucone."},
-            status=status.HTTP_200_OK,
-        )
+        return success("Wydarzenie anulowane, rezerwacje odrzucone.")

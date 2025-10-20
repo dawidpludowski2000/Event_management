@@ -4,6 +4,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from config.core.api_response import success, error
+
+
 
 class PublishEventView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsEventOrganizer]
@@ -12,15 +15,11 @@ class PublishEventView(APIView):
         try:
             event = Event.objects.get(pk=event_id)
         except Event.DoesNotExist:
-            return Response(
-                {"detail": "Event nie istnieje."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return error("Wydarzenie nie istnieje.", status=404)
 
         if event.status == "published":
-            return Response(
-                {"detail": "Wydarzenie już jest opublikowane."},
-                status=status.HTTP_200_OK,
-            )
+            return success("Wydarzenie już jest opublikowane.")
+            
 
         if event.status == "cancelled":
             return Response(
@@ -29,13 +28,8 @@ class PublishEventView(APIView):
             )
 
         if event.end_time <= event.start_time:
-            return Response(
-                {"detail": "Nieprawidłowy zakres dat (koniec ≤ początek)."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error("Nieprawidłowy zakres dat", status=400)
 
         event.status = "published"
         event.save(update_fields=["status"])
-        return Response(
-            {"detail": "Wydarzenie opublikowane."}, status=status.HTTP_200_OK
-        )
+        return success("Wydarzenie opublikowane.")

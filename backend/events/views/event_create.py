@@ -1,7 +1,8 @@
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from events.models import Event
 from events.serializers.event_create import EventCreateSerializer
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from config.core.api_response import success, error
 
 
 class EventCreateView(generics.CreateAPIView):
@@ -9,5 +10,18 @@ class EventCreateView(generics.CreateAPIView):
     serializer_class = EventCreateSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(organizer=self.request.user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        if not serializer.is_valid():
+            return error(
+                message="Nieprawidłowe dane wydarzenia.",
+                errors=serializer.errors,
+                status=400
+            )
+
+        event = serializer.save(organizer=request.user)
+        return success(
+            message="Wydarzenie utworzone.",
+            data={"id": event.id},
+            status=status.HTTP_201_CREATED
+        )

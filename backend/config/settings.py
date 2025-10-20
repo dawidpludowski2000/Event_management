@@ -73,7 +73,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     
     "config.core.request_id.RequestIDMiddleware",
-    "config.core.response_wrapper.ResponseWrapperMiddleware",
+    #"config.core.response_wrapper.ResponseWrapperMiddleware",
 
 
 ]
@@ -178,10 +178,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 
-    "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",
+    "EXCEPTION_HANDLER": "config.core.exceptions.custom_exception_handler",
 
     "DEFAULT_RENDERER_CLASSES": (
-        "config.renderers.EnvelopeJSONRenderer",
+        "config.core.renderers.EnvelopeJSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     )
 }
