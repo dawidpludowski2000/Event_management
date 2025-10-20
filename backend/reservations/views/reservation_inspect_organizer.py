@@ -1,28 +1,19 @@
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from events.services.organizer_permissions import IsEventOrganizer
 from reservations.models import Reservation
 from reservations.serializers.reservation_inspect import ReservationInspectSerializer
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from config.core.api_response import success, error
 
 
 class OrganizerReservationInspectView(APIView):
-    permission_classes = [
-        IsAuthenticated,
-        IsEventOrganizer,
-    ]  # sprawdza po reservation_id
+    permission_classes = [IsAuthenticated, IsEventOrganizer]
 
     def get(self, request, reservation_id: int):
         try:
-            reservation = Reservation.objects.select_related("user", "event").get(
-                id=reservation_id
-            )
+            reservation = Reservation.objects.select_related("user", "event").get(id=reservation_id)
         except Reservation.DoesNotExist:
-            return Response(
-                {"detail": "Rezerwacja nie istnieje."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return error("Rezerwacja nie istnieje.", status=404)
 
-        # IsEventOrganizer wpuści tylko organizatora tego eventu (po reservation_id)
         data = ReservationInspectSerializer(reservation).data
-        return Response(data, status=200)
+        return success("Szczegóły rezerwacji pobrane.", data)

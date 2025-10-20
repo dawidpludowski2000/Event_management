@@ -1,13 +1,14 @@
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from reservations.models import Reservation
 from reservations.serializers.reservation_list import ReservationListSerializer
-from rest_framework import generics, permissions
+from config.core.api_response import success
 
 
-class MyReservationsView(generics.ListAPIView):
-    serializer_class = ReservationListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class MyReservationsView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Reservation.objects.filter(user=self.request.user).select_related(
-            "event"
-        )
+    def get(self, request):
+        queryset = Reservation.objects.filter(user=request.user).select_related("event")
+        ser = ReservationListSerializer(queryset, many=True)
+        return success("Lista rezerwacji pobrana pomyślnie.", ser.data)
