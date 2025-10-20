@@ -2,10 +2,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import status
 from config.core.api_response import success, error
+from rest_framework.throttling import ScopedRateThrottle
+
 
 
 class LoginView(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
