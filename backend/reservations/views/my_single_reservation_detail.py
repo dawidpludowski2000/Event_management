@@ -1,9 +1,8 @@
 from events.models import Event
 from reservations.models import Reservation
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from config.core.api_response import success, error
 
 
 class MySingleReservationDetailView(APIView):
@@ -12,11 +11,8 @@ class MySingleReservationDetailView(APIView):
     def get(self, request, event_id):
         try:
             event = Event.objects.get(id=event_id)
-
         except Event.DoesNotExist:
-            return Response(
-                {"detail": "Event not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return error("Event not found.", status=404)
 
         reservation = Reservation.objects.filter(event=event, user=request.user).first()
 
@@ -25,27 +21,14 @@ class MySingleReservationDetailView(APIView):
         ).count()
 
         max_count = event.seats_limit or None
-        free_slots = (max_count - current_confirmed) if max_count else None
-
+        free_slots = (max_count - current_confirmed) if max_count is not None else None
         is_full = max_count is not None and current_confirmed >= max_count
 
-        if reservation:
-            return Response(
-                {
-                    "status": reservation.status,
-                    "full": False,  # bo jesteś już zapisany
-                    "free_slots": free_slots,
-                    "max_participants": max_count,
-                },
-                status=200,
-            )
+        data = {
+            "status": reservation.status if reservation else "NONE",
+            "full": False if reservation else is_full,
+            "free_slots": free_slots,
+            "max_participants": max_count,
+        }
 
-        return Response(
-            {
-                "status": "NONE",
-                "full": is_full,
-                "free_slots": free_slots,
-                "max_participants": max_count,
-            },
-            status=200,
-        )
+        return success("Reservation status fetched.", data)

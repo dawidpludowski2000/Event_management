@@ -1,13 +1,11 @@
-import logging
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from rest_framework import status
-
+from config.core.api_response import success, error
 from reservations.models import Reservation
 from events.services.organizer_permissions import IsEventOrganizer
 from events.services.realtime_metrics import broadcast_event_metrics
-from common.exceptions import raise_validation  # ✅ NOWE
 
 
 class OrganizerReservationCheckInView(APIView):
@@ -17,39 +15,41 @@ class OrganizerReservationCheckInView(APIView):
         try:
             reservation = Reservation.objects.select_related("event", "user").get(id=reservation_id)
         except Reservation.DoesNotExist:
-            raise_validation("Rezerwacja nie istnieje.")
+            raise NotFound("Rezerwacja nie istnieje.")
 
-        # Nie można zrobić check-in jeśli nie potwierdzono rezerwacji
+        # check-in tylko dla confirmed
         if reservation.status != "confirmed":
-            raise_validation("Nie można wykonać check-in dla niepotwierdzonej rezerwacji.")
+            return error(
+                message="Check-in jest możliwy tylko dla rezerwacji potwierdzone.",
+                errors={"detail": "Check-in jest możliwy tylko dla rezerwacji potwierdzonych."},
+                status=400
+            )
 
-        # Jeśli już jest check-in – endpoint idempotentny
+        # idempotencja – jeśli już było check-in
         if reservation.checked_in:
-            return Response({
-                "success": True,
-                "message": "Rezerwacja była już wcześniej oznaczona jako obecna.",
-                "data": {
+            return success(
+                message="Rezerwacja była już wcześniej oznaczona jako obecna.",
+                data={
                     "reservation_id": reservation.id,
-                    "checked_in": True
-                }
-            }, status=status.HTTP_200_OK)
+                    "checked_in": True,
+                    "detail": "Rezerwacja była już wcześniej oznaczona jako obecna."
+                },
+                status=status.HTTP_200_OK
+            )
 
-        # ✅ Właściwy check-in
+        # wykonaj check-in po raz pierwszy
         reservation.checked_in = True
         reservation.save(update_fields=["checked_in"])
 
-        # broadcast live metrics update
+        # broadcast tylko przy pierwszym check-in
         broadcast_event_metrics(reservation.event)
 
-        logging.getLogger(__name__).info(
-            "Check-in confirmed for reservation %s", reservation.id
-        )
-
-        return Response({
-            "success": True,
-            "message": "Check-in wykonany.",
-            "data": {
+        return success(
+            message="Check-in wykonany pomyślnie.",
+            data={
                 "reservation_id": reservation.id,
-                "checked_in": True
-            }
-        }, status=status.HTTP_200_OK)
+                "checked_in": True,
+                "detail": "Check-in wykonany pomyślnie."
+            },
+            status=status.HTTP_200_OK
+        )

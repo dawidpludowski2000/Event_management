@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework.response import Response
 
 def success(message="OK", data=None, status=200):
@@ -7,9 +8,11 @@ def success(message="OK", data=None, status=200):
         "data": data,
     }, status=status)
 
-def error(message="Błąd", errors=None, status=400):
-    return Response({
+def error(message="Error", errors=None, status=400):
+    return JsonResponse({
         "success": False,
         "message": message,
-        "errors": errors or {},
+        "detail": message,  
+        "errors": errors or {}
     }, status=status)
+

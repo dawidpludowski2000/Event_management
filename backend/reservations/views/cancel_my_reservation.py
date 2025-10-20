@@ -1,8 +1,9 @@
 from rest_framework import permissions, status
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from reservations.models import Reservation
-from common.exceptions import raise_validation
+from config.core.api_response import success, error
+from events.services.realtime_metrics import broadcast_event_metrics
+from reservations.services.waitlist_service import promote_from_waitlist_fill
 
 
 class CancelMyReservationView(APIView):
@@ -10,21 +11,24 @@ class CancelMyReservationView(APIView):
 
     def delete(self, request, reservation_id):
         try:
-            reservation = Reservation.objects.get(id=reservation_id, user=request.user)
+            reservation = Reservation.objects.select_related("event").get(
+                id=reservation_id, user=request.user
+            )
         except Reservation.DoesNotExist:
-            raise_validation("Nie masz takiej rezerwacji lub już została anulowana.")
+            return error("Nie znaleziono rezerwacji.", status=404)
 
-        if reservation.status == "cancelled":
-            raise_validation("Rezerwacja została już anulowana.")
+        event = reservation.event
+        was_confirmed = reservation.status == "confirmed"
 
-        reservation.status = "cancelled"
-        reservation.save(update_fields=["status"])
+        reservation.delete()
 
-        return Response(
-            {
-                "success": True,
-                "message": "Rezerwacja została anulowana.",
-                "data": {"reservation_id": reservation_id},
-            },
-            status=status.HTTP_200_OK,
+        if was_confirmed:
+            promote_from_waitlist_fill(event)
+
+        broadcast_event_metrics(event)
+
+        return success(
+            message="Rezerwacja została anulowana.",
+            data={"reservation_id": reservation_id},
+            status=200
         )
