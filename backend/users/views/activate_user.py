@@ -1,7 +1,7 @@
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 from users.models import ActivationToken
+from config.core.api_response import success, error
 
 
 class ActivateUserView(APIView):
@@ -12,25 +12,30 @@ class ActivateUserView(APIView):
         try:
             token_obj = ActivationToken.objects.select_related("user").get(token=token)
         except ActivationToken.DoesNotExist:
-            return Response(
-                {"detail": "Nieprawidłowy lub wykorzystany token."},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error(
+                message="Nieprawidłowy lub wygasły link aktywacyjny.",
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         user = token_obj.user
 
         if user.is_active:
-            return Response(
-                {"detail": "Konto jest już aktywne."}, status=status.HTTP_200_OK
+            # konto już aktywne
+            return success(
+                message="Konto jest już aktywne. Możesz się zalogować.",
+                data={"email": user.email},
+                status=status.HTTP_200_OK
             )
 
+        # aktywuj konto
         user.is_active = True
         user.save(update_fields=["is_active"])
 
-        # usunięcie wszystkich aktualnych tokenów aktywacyjnych usera
+        # usuń wszystkie tokeny tego usera
         ActivationToken.objects.filter(user=user).delete()
 
-        return Response(
-            {"detail": "Konto zostało aktywowane. Możesz się teraz zalogować."},
-            status=status.HTTP_200_OK,
+        return success(
+            message="Konto zostało aktywowane. Możesz się teraz zalogować.",
+            data={"email": user.email},
+            status=status.HTTP_200_OK
         )

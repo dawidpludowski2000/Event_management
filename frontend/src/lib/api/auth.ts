@@ -15,9 +15,19 @@ export async function loginUser(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error("Nieprawidłowy email lub hasło.");
-  return res.json();
+
+  const data = await res.json();
+
+  if (!res.ok || data.success === false) {
+    throw new Error(data.message || "Nieprawidłowy email lub hasło.");
+  }
+
+  return {
+    access: data.data.access,
+    refresh: data.data.refresh,
+  };
 }
+
 
 // NOWA sygnatura: (email, password, opcjonalne imię/nazwisko)
 export async function registerUser(
