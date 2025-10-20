@@ -10,33 +10,25 @@ class CancelMyReservationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, reservation_id):
-
         try:
             reservation = Reservation.objects.select_related("event").get(
                 id=reservation_id, user=request.user
             )
         except Reservation.DoesNotExist:
-            return error("Nie masz takiej rezerwacji lub już została anulowana.", status=404)
+            return error("Nie znaleziono rezerwacji.", status=404)
 
-        if reservation.status == "cancelled":
-            return success(
-                "Rezerwacja została już anulowana.",
-                data={"reservation_id": reservation.id},
-                status=200
-            )
-
+        event = reservation.event
         was_confirmed = reservation.status == "confirmed"
 
-        reservation.status = "cancelled"
-        reservation.save(update_fields=["status"])
+        reservation.delete()
 
         if was_confirmed:
-            promote_from_waitlist_fill(reservation.event)
+            promote_from_waitlist_fill(event)
 
-        broadcast_event_metrics(reservation.event)
+        broadcast_event_metrics(event)
 
         return success(
             message="Rezerwacja została anulowana.",
-            data={"reservation_id": reservation.id},
-            status=status.HTTP_200_OK
+            data={"reservation_id": reservation_id},
+            status=200
         )

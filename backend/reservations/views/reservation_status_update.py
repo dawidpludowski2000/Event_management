@@ -1,14 +1,12 @@
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-
 from events.services.organizer_permissions import IsEventOrganizer
 from reservations.models import Reservation
 from reservations.serializers.reservation_status_update import ReservationStatusUpdateSerializer
 from notifications.services.email import send_reservation_status_email
 from events.services.realtime_metrics import broadcast_event_metrics
-from common.exceptions import raise_validation
-from config.core.api_response import success
+from config.core.api_response import success, error
 
 
 class ReservationStatusUpdateView(APIView):
@@ -16,34 +14,40 @@ class ReservationStatusUpdateView(APIView):
 
     def patch(self, request, reservation_id: int):
         try:
-            reservation = Reservation.objects.select_related("event").get(id=reservation_id)
+            reservation = Reservation.objects.select_related("event", "user").get(id=reservation_id)
         except Reservation.DoesNotExist:
-            raise_validation("Rezerwacja nie istnieje.", status=404)
+            return error("Rezerwacja nie istnieje.", status=404)
 
-        # Nie można zmieniać statusu zakończonych rezerwacji
+        # Jeśli już potwierdzona lub odrzucona → blokuj
         if reservation.status in ["confirmed", "rejected"]:
-            raise_validation("Nie można zmienić statusu zakończonego zgłoszenia.", status=400)
+            return error("Nie można zmienić statusu zakończonego zgłoszenia.", status=400)
 
         serializer = ReservationStatusUpdateSerializer(
             instance=reservation, data=request.data, partial=True
         )
-        serializer.is_valid(raise_exception=True)
+
+        if not serializer.is_valid():
+            return error("Błąd walidacji.", errors=serializer.errors, status=400)
+
         new_status = serializer.validated_data.get("status")
 
-        # Limit tylko przy potwierdzeniu
+        # Blokada potwierdzenia przy pełnym evencie
         if new_status == "confirmed":
             confirmed_count = Reservation.objects.filter(
                 event=reservation.event, status="confirmed"
             ).count()
-
             if confirmed_count >= reservation.event.seats_limit:
-                raise_validation("Brak wolnych miejsc – limit osiągnięty.", status=400)
+                return error("Brak wolnych miejsc – limit osiągnięty.", status=400)
 
         # Zapis atomowy
         with transaction.atomic():
             serializer.save()
 
-        # Wyślij email
+        # Jeśli rejected → żadnych maili ani broadcastów
+        if new_status == "rejected":
+            return success("Rezerwacja odrzucona.", {"status": "rejected"})
+
+        # Jeśli confirmed → mail + aktualizacja live
         send_reservation_status_email(
             user_email=reservation.user.email,
             user_name=reservation.user.get_username() or reservation.user.username,
@@ -55,7 +59,6 @@ class ReservationStatusUpdateView(APIView):
             event_location=reservation.event.location,
         )
 
-        # Live update broadcast
         broadcast_event_metrics(reservation.event)
 
         return success(
