@@ -13,7 +13,11 @@ class OrganizerReservationInspectView(APIView):
         try:
             reservation = Reservation.objects.select_related("user", "event").get(id=reservation_id)
         except Reservation.DoesNotExist:
-            return error("Rezerwacja nie istnieje.", status=404)
+            return error(message="Reservation not found.", status=404)
 
         data = ReservationInspectSerializer(reservation).data
-        return success("Szczegóły rezerwacji pobrane.", data)
+        return success(
+            message="Reservation details retrieved.",
+            data=data,
+            status=200
+        )

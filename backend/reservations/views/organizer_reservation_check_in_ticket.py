@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import status
+
 from config.core.api_response import success, error
 from reservations.models import Reservation
 from events.services.organizer_permissions import IsEventOrganizer
@@ -21,8 +22,8 @@ class OrganizerReservationCheckInView(APIView):
         if reservation.status != "confirmed":
             return error(
                 message="Check-in jest możliwy tylko dla rezerwacji potwierdzone.",
-                errors={"detail": "Check-in jest możliwy tylko dla rezerwacji potwierdzonych."},
-                status=400
+                errors={"detail": "Rezerwacja nie ma statusu confirmed."},
+                status=400,
             )
 
         # idempotencja – jeśli już było check-in
@@ -32,9 +33,9 @@ class OrganizerReservationCheckInView(APIView):
                 data={
                     "reservation_id": reservation.id,
                     "checked_in": True,
-                    "detail": "Rezerwacja była już wcześniej oznaczona jako obecna."
+                    "detail": "Rezerwacja już wcześniej była oznaczona jako obecna.",
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         # wykonaj check-in po raz pierwszy
@@ -49,7 +50,7 @@ class OrganizerReservationCheckInView(APIView):
             data={
                 "reservation_id": reservation.id,
                 "checked_in": True,
-                "detail": "Check-in wykonany pomyślnie."
+                "detail": "Check-in wykonany pomyślnie.",
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
