@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/lib/config";
 import { authFetch } from "@/lib/api/http";
 
 export async function cancelReservation(reservationId: number): Promise<Response> {
@@ -25,14 +24,24 @@ export async function rejectReservation(reservationId: number): Promise<Response
 
 export async function getMyReservations(): Promise<any[]> {
   const res = await authFetch(`/api/my-reservations/`);
-  if (!res.ok) throw new Error("Błąd pobierania rezerwacji");
-  return await res.json();
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Błąd pobierania rezerwacji");
+  }
+
+  return json.data?.results || json.data || [];
 }
 
 export async function getOrganizerReservations(): Promise<any[]> {
   const res = await authFetch(`/api/organizer/reservations/`);
-  if (!res.ok) throw new Error("Błąd podczas pobierania rezerwacji");
-  return await res.json();
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Błąd podczas pobierania rezerwacji");
+  }
+
+  return json.data?.results || json.data || [];
 }
 
 export async function downloadTicket(reservationId: number): Promise<Blob> {
@@ -41,7 +50,6 @@ export async function downloadTicket(reservationId: number): Promise<Blob> {
   return await res.blob();
 }
 
-// Funkcja do skanowania biletu
 export async function checkInReservation(reservationId: number): Promise<{
   detail: string;
   checked_in: boolean;
@@ -50,14 +58,12 @@ export async function checkInReservation(reservationId: number): Promise<{
   const res = await authFetch(`/api/reservations/${reservationId}/check-in/`, {
     method: "POST",
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.detail || "Błąd podczas check-in");
-  return data;
-}
 
-//
-export async function inspectReservation(reservationId: number): Promise<any> {
-  const res = await authFetch(`/api/reservations/${reservationId}/inspect/`);
-  if (!res.ok) throw new Error("Nie udało się pobrać danych rezerwacji");
-  return res.json();
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Błąd podczas check-in");
+  }
+
+  // Backend w data.detail / data.checked_in / data.reservation_id
+  return json.data || {};
 }
