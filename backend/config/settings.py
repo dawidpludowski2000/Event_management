@@ -216,6 +216,13 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+SIMPLE_JWT.update({
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+})
+
+
 # -----------------------------------------------------------------------------
 # Channels (WebSockets)
 # -----------------------------------------------------------------------------
