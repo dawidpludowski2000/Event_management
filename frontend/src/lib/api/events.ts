@@ -12,6 +12,7 @@ export async function getAllEvents(): Promise<any[]> {
   return json.data?.results || json.data || [];
 }
 
+
 export async function registerToEvent(eventId: number): Promise<Response> {
   return authFetch(`/api/events/${eventId}/register/`, {
     method: "POST",
