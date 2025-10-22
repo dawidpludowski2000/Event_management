@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { authFetch } from "@/lib/api/http";
 
 export function useMyReservationStatus(eventId: number) {
+
   const [registered, setRegistered] = useState<boolean | null>(null);
   const [isFull, setIsFull] = useState(false);
   const [freeSlots, setFreeSlots] = useState<number | null>(null);
@@ -12,12 +13,19 @@ export function useMyReservationStatus(eventId: number) {
   const fetchStatus = useCallback(async () => {
     try {
       const res = await authFetch(`/api/events/${eventId}/my-reservation/`);
+
       if (res.ok) {
-        const data = await res.json();
-        setRegistered(data.status !== "NONE" && !!data.status);
+        const json = await res.json();
+
+        const data = json?.data ?? json; 
+
+        setRegistered(["pending", "confirmed"].includes(data.status));
         setIsFull(data.full);
         setFreeSlots(data.free_slots);
         setMaxParticipants(data.max_participants);
+
+
+
         setError(null);
       } else {
         setRegistered(false);
