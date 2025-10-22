@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { use } from "react";
 
 
 export default function CreateNewEventButton() {
