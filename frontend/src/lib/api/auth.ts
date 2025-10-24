@@ -15,14 +15,18 @@ export async function loginUser(
     body: JSON.stringify({ email, password }),
   });
 
-  const json = await res.json().catch(() => ({}));
-
-  if (!res.ok || json.success === false) {
-    throw new Error(json.message || "Nieprawidłowy email lub hasło.");
+  if (res.status === 401) {
+    throw new Error("Nieprawidłowy e-mail lub hasło.");
   }
 
-  return json.data || {};
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Błąd logowania.");
+  }
+
+  return res.json();
 }
+
 
 export async function registerUser(
   email: string,

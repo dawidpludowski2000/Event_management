@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/api/auth";
+import { toast } from "react-hot-toast";
 
 interface Props {
   email: string;
@@ -13,27 +14,32 @@ interface Props {
 
 export default function RegisterButton({ email, password, firstName, lastName }: Props) {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    if (!email || !password) {
+      toast.error("Podaj e-mail i hasło.");
+      return;
+    }
+
     try {
+      setLoading(true);
       await registerUser(email, password, {
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
       });
-      alert("Rejestracja zakończona sukcesem! Sprawdź e-mail aktywacyjny.");
+      toast.success("Rejestracja zakończona sukcesem! Sprawdź e-mail aktywacyjny 📧");
       router.push("/login");
     } catch (err: any) {
-      setError(err.message || "Błąd podczas rejestracji.");
+      toast.error(err.message || "Błąd podczas rejestracji.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <button type="button" onClick={handleRegister}>
-        Zarejestruj
-      </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </>
+    <button type="button" onClick={handleRegister} disabled={loading}>
+      {loading ? "Rejestracja..." : "Zarejestruj"}
+    </button>
   );
 }
