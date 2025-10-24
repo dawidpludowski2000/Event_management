@@ -12,13 +12,18 @@ import OrganizerPanelButton from "@/components/buttons/OrganizerPanelButton";
 
 import EventAvailability from "@/components/event-info/EventAvailability";
 
-import { checkIfOrganizer } from "@/lib/utils/roles";
+import { checkIfOrganizer, checkIfAdmin } from "@/lib/utils/roles";
 import { getAllEvents } from "@/lib/api/events";
+import AdminPanelButton from "@/components/buttons/admin-buttons/AdminPanelButton";
+
+
 
 export default function EventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<any[]>([]);
   const [isOrganizer, setIsOrganizer] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -30,6 +35,8 @@ export default function EventsPage() {
 
     checkIfOrganizer().then(setIsOrganizer);
 
+    checkIfAdmin().then(setIsAdmin);
+
     getAllEvents()
       .then(setEvents)
       .catch((err) => {
@@ -40,40 +47,45 @@ export default function EventsPage() {
 
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Wyloguj w prawym górnym rogu */}
-      <div style={{ position: "absolute", top: 0, right: 600 }}>
-        <LogoutButton />
-      </div>
+  <div style={{ position: "relative" }}>
+    {/* Wyloguj w prawym górnym rogu */}
+    <div style={{ position: "absolute", top: 0, right: 600 }}>
+      <LogoutButton />
+    </div>
 
-      {/* Moje rezerwacje po lewej */}
-      <MyReservationsButton />
+    {/* Moje rezerwacje po lewej */}
+    <MyReservationsButton />
 
-      <h1>Lista wydarzeń</h1>
+    <h1>Lista wydarzeń</h1>
 
+    {/* Przyciski Panelu organizatora i admina obok siebie */}
+    <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
       {isOrganizer && <OrganizerPanelButton />}
+      {isAdmin && <AdminPanelButton />}
+    </div>
 
+    <ul>
+      {events.map((event) => (
+        <li
+          key={event.id}
+          style={{
+            marginBottom: "3rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <strong>{event.title}</strong> – {event.start_time} - {event.location}
+            <EventRegisterButton eventId={event.id} />
+          </div>
 
-      <ul>
-        {events.map((event) => (
-          <li
-            key={event.id}
-            style={{
-              marginBottom: "3rem",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <strong>{event.title}</strong> – {event.start_time} - {event.location}
-              <EventRegisterButton eventId={event.id} />
-            </div>
-
-            <EventAvailability
-              eventId={event.id}
-              seatsLimit={event.seats_limit}
-            />
-          </li>
-        ))}
-      </ul>
+          <EventAvailability
+            eventId={event.id}
+            seatsLimit={event.seats_limit}
+          />
+        </li>
+      ))}
+    </ul>
     </div>
   );
 }
+
+

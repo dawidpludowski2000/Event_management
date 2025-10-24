@@ -139,7 +139,7 @@ export default function OrganizerReservationsPage() {
                 {event.status === "published"
                   ? "Opublikowane"
                   : event.status === "draft"
-                  ? "Szkic"
+                  ? "W kolejce"
                   : "Anulowane"}
               </span>
               <div style={{ marginTop: 6 }}>
