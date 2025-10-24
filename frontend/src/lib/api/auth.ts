@@ -15,17 +15,20 @@ export async function loginUser(
     body: JSON.stringify({ email, password }),
   });
 
-  if (res.status === 401) {
-    throw new Error("Nieprawidłowy e-mail lub hasło.");
+  const json = await res.json();
+
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Nieprawidłowy e-mail lub hasło.");
   }
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail || "Błąd logowania.");
+  const data = json.data || {};
+  if (!data.access || !data.refresh) {
+    throw new Error("Brak tokenów w odpowiedzi serwera.");
   }
 
-  return res.json();
+  return data;
 }
+
 
 
 export async function registerUser(

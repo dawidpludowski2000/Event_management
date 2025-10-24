@@ -13,14 +13,14 @@ export async function authFetch(
 
   const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
-  // 🔒 automatyczne wylogowanie przy 401
+  // automatyczne wylogowanie przy 401
   if (res.status === 401 && typeof window !== "undefined") {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     window.location.href = "/login";
   }
 
-  // 🔍 sprawdzamy standardowy format odpowiedzi backendu
+  //  sprawdzam standardowy format odpowiedzi backendu
   try {
     const json = await res.clone().json().catch(() => ({}));
     if (json.success === false) {
