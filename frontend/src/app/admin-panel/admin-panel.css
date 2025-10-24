@@ -1,0 +1,71 @@
+/* === Layout === */
+
+.admin-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+/* === Tabela użytkowników === */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.admin-table tr:hover {
+  background-color: #fafafa;
+}
+
+/* === Przyciski roli === */
+
+.admin-toggle-btn {
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+/*  Nadaj rolę  */
+.admin-toggle-btn.add {
+  background-color: #4b8df8;
+}
+
+.admin-toggle-btn.add:hover {
+  background-color: #357ae8;
+}
+
+/* Usuń rolę  */
+.admin-toggle-btn.remove {
+  background-color: #e57373;
+}
+
+.admin-toggle-btn.remove:hover {
+  background-color: #ef5350;
+}

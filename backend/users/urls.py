@@ -5,6 +5,8 @@ from users.views.auth import RegisterView
 from users.views.login import LoginView
 from users.views.change_users_role import AdminUserListView
 from users.views.change_users_role import AdminSetOrganizerView
+from users.views.me_view import MeView
+
 
 
 urlpatterns = [
@@ -14,4 +16,5 @@ urlpatterns = [
     path("activate/<uuid:token>/", ActivateUserView.as_view(), name="activate-user"),
     path("admin/users/", AdminUserListView.as_view(), name="admin-user-list"),
     path("admin/users/<int:user_id>/set-organizer/", AdminSetOrganizerView.as_view(), name="admin-set-organizer"),
+    path("me/", MeView.as_view(), name="me"),
 ]
