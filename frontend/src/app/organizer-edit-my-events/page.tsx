@@ -1,28 +1,21 @@
 "use client";
 
-import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { updateOrganizerEvent } from "@/lib/api/events";
+import { toast } from "react-hot-toast";
 
 export default function OrganizerEditMyEventsPage() {
-  // Page (wrapper) NIE używa useSearchParams bezpośrednio — tylko opakowuje Suspense.
-  return (
-    <Suspense fallback={<p>⏳ Ładowanie…</p>}>
-      <EditEventForm />
-    </Suspense>
-  );
-}
-
-function EditEventForm() {
   const router = useRouter();
-  const sp = useSearchParams(); 
+  const sp = useSearchParams();
   const eventId = Number(sp.get("eventId"));
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!Number.isFinite(eventId)) {
-      alert("Brak poprawnego eventId w adresie.");
+      toast.error("Brak poprawnego eventId w adresie.");
       return;
     }
 
@@ -32,27 +25,29 @@ function EditEventForm() {
     const description = String(f.get("description") || "");
 
     if (!start && !end && !description) {
-      alert("Wpisz chociaż jedną zmianę (data/godzina lub opis).");
-      return;
-    }
-    if (start && end && new Date(end) <= new Date(start)) {
-      alert("Koniec musi być po początku.");
+      toast.error("Wpisz chociaż jedną zmianę (data/godzina lub opis).");
       return;
     }
 
-    const payload: Record<string, unknown> = {};
+    if (start && end && new Date(end) <= new Date(start)) {
+      toast.error("Koniec musi być po początku.");
+      return;
+    }
+
+    const payload: any = {};
     if (start) payload.start_time = new Date(start).toISOString();
     if (end) payload.end_time = new Date(end).toISOString();
     if (description) payload.description = description;
 
     try {
+      setLoading(true);
       await updateOrganizerEvent(eventId, payload);
+      toast.success("Zapisano zmiany!");
       router.push("/organizer-reservation");
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Błąd edycji wydarzenia.";
-      alert(message);
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err?.message || "Błąd edycji wydarzenia.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,17 +58,23 @@ function EditEventForm() {
         Zmień tylko to, co potrzebujesz. Puste pola nie będą wysłane.
       </p>
 
-      <label>Początek (data i godzina)</label><br />
+      <label>Początek</label><br />
       <input name="start_time" type="datetime-local" /><br />
 
-      <label>Koniec (data i godzina)</label><br />
+      <label>Koniec</label><br />
       <input name="end_time" type="datetime-local" /><br />
 
-      <label>Opis (opcjonalnie)</label><br />
+      <label>Opis</label><br />
       <textarea name="description" rows={3} /><br />
 
-      <button type="submit">Zapisz zmiany</button>
-      <button type="button" onClick={() => router.push("/organizer-reservation")} style={{ marginLeft: 8 }}>
+      <button type="submit" disabled={loading}>
+        {loading ? "Zapisywanie..." : "Zapisz zmiany"}
+      </button>
+      <button
+        type="button"
+        onClick={() => router.push("/organizer-reservation")}
+        style={{ marginLeft: 8 }}
+      >
         Anuluj
       </button>
     </form>
