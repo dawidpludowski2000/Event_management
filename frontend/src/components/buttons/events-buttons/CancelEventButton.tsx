@@ -15,10 +15,10 @@ export default function CancelEventButton({
     const res = await cancelEvent(eventId);
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      toast.success(data.detail || "Wydarzenie anulowane");
+      toast.success(data.detail || "Wydarzenie zostało anulowane ❌");
       onSuccess();
     } else {
-      toast.error(data.detail || "Nie udało się anulować");
+      toast.error(data.detail || "Nie udało się anulować wydarzenia");
     }
   };
 

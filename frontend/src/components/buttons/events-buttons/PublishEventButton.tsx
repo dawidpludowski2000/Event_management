@@ -13,10 +13,10 @@ export default function PublishEventButton({
     const res = await publishEvent(eventId);
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      toast.success(data.detail || "Wydarzenie opublikowane");
+      toast.success(data.detail || "Wydarzenie zostało opublikowane ✅");
       onSuccess();
     } else {
-      toast.error(data.detail || "Nie udało się opublikować");
+      toast.error(data.detail || "Nie udało się opublikować wydarzenia ❌");
     }
   };
 
