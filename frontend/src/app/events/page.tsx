@@ -53,16 +53,19 @@ export default function EventsPage() {
       <LogoutButton />
     </div>
 
+      
+    {/* Przyciski Panelu organizatora i admina obok siebie */}
+    <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+      {isOrganizer && <OrganizerPanelButton />}
+      {isAdmin && <AdminPanelButton />}
+      </div>
+      
     {/* Moje rezerwacje po lewej */}
     <MyReservationsButton />
 
     <h1>Lista wydarzeń</h1>
 
-    {/* Przyciski Panelu organizatora i admina obok siebie */}
-    <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-      {isOrganizer && <OrganizerPanelButton />}
-      {isAdmin && <AdminPanelButton />}
-    </div>
+    
 
     <ul>
       {events.map((event) => (
