@@ -32,21 +32,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    environment:
-      DJANGO_SECRET_KEY: dev-insecure-key
-      DJANGO_SETTINGS_MODULE: config.settings
-      DEBUG: "False"
-      ENABLE_SECURE_HEADERS: "True"
-      SECURE_SSL_REDIRECT: "False"         # lokalnie bez TLS
-      ALLOWED_HOSTS: "localhost,127.0.0.1"
-      CORS_ALLOWED_ORIGINS: "http://localhost:3000"
-      CSRF_TRUSTED_ORIGINS: "http://localhost:3000"
-      DATABASE_URL: postgresql://eventflow:eventflow@db:5432/eventflow
-      REDIS_URL: redis://redis:6379/0
-      LOG_JSON: "True"
-      SENTRY_ENVIRONMENT: "production"
-      EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
-      DEFAULT_FROM_EMAIL: "no-reply@example.com"
+    env_file:
+      - D:\EventFlow_Projects_Python\backend\.env.prod
+
     ports:
       - "8000:8000"
     working_dir: /app
@@ -55,7 +43,7 @@ services:
         python -m pip install --upgrade pip &&
         pip install -r requirements.txt &&
         python manage.py migrate &&
-        gunicorn config.wsgi:application --bind 0.0.0.0:8000
+        daphne -b 0.0.0.0 -p 8000 config.asgi:application
       "
 
 volumes:
