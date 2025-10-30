@@ -1,4 +1,6 @@
 import logging
+import os
+
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -21,17 +23,22 @@ def send_activation_email(sender, instance, created, **kwargs):
     # Tworzenie tokena
     token_obj = ActivationToken.objects.create(user=instance)
 
-    # Link aktywacyjny
-    activation_link = f"http://localhost:8000/api/users/activate/{token_obj.token}/"
+    activation_link = f"{os.getenv('FRONTEND_ACTIVATION_URL', 'http://localhost:8000')}/api/users/activate/{token_obj.token}/"
 
-    # Wysyłka maila
     send_mail(
-        subject="Aktywuj swoje konto",
-        message=f"Cześć! Aktywuj swoje konto klikając w poniższy link:\n{activation_link}",
+        subject="Aktywacja konta w EventFlow",
+        message=(
+            f"Cześć {instance.first_name or ''},\n\n"
+            f"Dziękujemy za rejestrację w EventFlow!\n"
+            f"Aby aktywować swoje konto, kliknij w poniższy link:\n\n"
+            f"{activation_link}\n\n"
+            f"Pozdrawiamy,\nZespół EventFlow 🚀"
+        ),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[instance.email],
         fail_silently=False,
     )
+
 
     logger = logging.getLogger(__name__)
 
