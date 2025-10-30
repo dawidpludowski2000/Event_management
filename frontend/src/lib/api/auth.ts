@@ -52,3 +52,19 @@ export async function registerUser(
     throw new Error(json.message || "Błąd rejestracji.");
   }
 }
+
+
+export async function activateAccount(token: string): Promise<any> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/users/activate/${token}/`,
+    { method: "GET" }
+  );
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Nie udało się aktywować konta.");
+  }
+
+  return json;
+}

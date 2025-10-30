@@ -23,7 +23,7 @@ def send_activation_email(sender, instance, created, **kwargs):
     # Tworzenie tokena
     token_obj = ActivationToken.objects.create(user=instance)
 
-    activation_link = f"{os.getenv('FRONTEND_ACTIVATION_URL', 'http://localhost:8000')}/api/users/activate/{token_obj.token}/"
+    activation_link = f"{os.getenv('FRONTEND_ACTIVATION_URL', 'http://localhost:3000')}/activate-site/{token_obj.token}/"
 
     send_mail(
         subject="Aktywacja konta w EventFlow",
