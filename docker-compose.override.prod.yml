@@ -33,7 +33,8 @@ services:
       redis:
         condition: service_started
     env_file:
-      - D:\EventFlow_Projects_Python\backend\.env.prod
+      - .env.prod
+
 
     ports:
       - "8000:8000"
