@@ -3,7 +3,7 @@ import { FlatCompat } from "@eslint/eslintrc";
 
 const compat = new FlatCompat();
 
-export default [
+const config = [
   {
     ignores: ["**/.next/**", "**/node_modules/**", "**/dist/**", "**/build/**"],
   },
@@ -20,3 +20,5 @@ export default [
     },
   },
 ];
+
+export default config;

@@ -1,9 +1,8 @@
 // MOJE REZERWACJE
 
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BackEventListButton from "@/components/buttons/events-buttons/BackEventListButton";
 import CancelReservationButton from "@/components/buttons/reservations-buttons/CancelReservationButton";
@@ -15,7 +14,7 @@ export default function MyReservationsPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const router = useRouter();
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     const token = localStorage.getItem("access_token");
 
     if (!token) {
@@ -29,11 +28,11 @@ export default function MyReservationsPage() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchReservations();
-  }, [router]);
+  }, [fetchReservations]);
 
   return (
     <div>
@@ -43,46 +42,37 @@ export default function MyReservationsPage() {
       <ul>
         {reservations.map((res) => (
           <li
-  key={res.event_title + res.event_start_time}
-  style={{ marginBottom: "20px" }} // odstęp między rezerwacjami
->
-  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-    <strong>{res.event_title}</strong> – {res.event_start_time} - {res.location} –
-    <span
-      className={
-        res.status === "confirmed"
-          ? styles.statusConfirmed
-          : res.status === "cancelled"
-          ? styles.statusCancelled
-          : styles.statusPending
-      }
-    >
-      {res.status}
-    </span>
+            key={res.event_title + res.event_start_time}
+            style={{ marginBottom: "20px" }} // odstęp między rezerwacjami
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <strong>{res.event_title}</strong> – {res.event_start_time} - {res.location} –
+              <span
+                className={
+                  res.status === "confirmed"
+                    ? styles.statusConfirmed
+                    : res.status === "cancelled"
+                    ? styles.statusCancelled
+                    : styles.statusPending
+                }
+              >
+                {res.status}
+              </span>
 
-    {/* obok statusu */}
-    {res.status === "confirmed" && (
-      <DownloadTicketButton reservationId={res.reservation_id} />
-    )}
-  </div>
+              {res.status === "confirmed" && (
+                <DownloadTicketButton reservationId={res.reservation_id} />
+              )}
+            </div>
 
-  {/* pod spodem */}
-    {/* pod spodem */}
-    {/* pod spodem */}
-    {/* pod spodem */}
-  <div style={{ marginTop: "8px" }}>
-    <CancelReservationButton
-      reservationId={res.reservation_id}
-      onSuccess={fetchReservations}
-    />
-  </div>
-
-
-
-</li>
-
+            <div style={{ marginTop: "8px" }}>
+              <CancelReservationButton
+                reservationId={res.reservation_id}
+                onSuccess={fetchReservations}
+              />
+            </div>
+          </li>
         ))}
       </ul>
     </div>
-  )
-};
+  );
+}

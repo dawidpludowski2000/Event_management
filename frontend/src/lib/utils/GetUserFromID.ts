@@ -3,7 +3,7 @@ export function getUserIdFromToken(token: string): number | null {
     const payloadBase64 = token.split(".")[1];
     const decodedPayload = JSON.parse(atob(payloadBase64));
     return decodedPayload.user_id || null;
-  } catch (error) {
+  } catch  {
     return null;
   }
 }

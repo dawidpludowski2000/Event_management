@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/lib/config";
 import { authFetch } from "@/lib/api/http";
 
 export async function getAllEvents(): Promise<any[]> {
