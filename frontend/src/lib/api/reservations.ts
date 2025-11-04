@@ -67,3 +67,16 @@ export async function checkInReservation(reservationId: number): Promise<{
   // Backend w data.detail / data.checked_in / data.reservation_id
   return json.data || {};
 }
+
+
+export async function inspectReservation(reservationId: number): Promise<any> {
+  const res = await authFetch(`/api/reservations/${reservationId}/inspect/`);
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok || json.success === false) {
+    throw new Error(json.message || "Błąd pobierania danych rezerwacji");
+  }
+
+  return json.data;
+}
+

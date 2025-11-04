@@ -34,11 +34,7 @@ api_v1_patterns = [
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair_v1"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh_v1"),
     path("schema/", SpectacularAPIView.as_view(), name="schema_v1"),
-    path(
-        "docs/",
-        SpectacularSwaggerView.as_view(url_name="schema_v1"),
-        name="swagger_ui_v1",
-    ),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema_v1"), name="swagger_ui_v1",),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema_v1"), name="redoc_v1"),
 ]
 
@@ -53,10 +49,7 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path(
-        "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("health/", healthcheck, name="health"),

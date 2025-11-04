@@ -1,4 +1,3 @@
-# backend/events/services/realtime.py
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db.models import Count, Q
@@ -6,10 +5,6 @@ from reservations.models import Reservation
 
 
 def broadcast_event_metrics(event):
-    """
-    Policz i wyślij do grupy event_<id>:
-      confirmed_count, pending_count, checked_in_count, spots_left
-    """
     agg = Reservation.objects.filter(event=event).aggregate(
         confirmed_count=Count("id", filter=Q(status="confirmed")),
         pending_count=Count("id", filter=Q(status="pending")),

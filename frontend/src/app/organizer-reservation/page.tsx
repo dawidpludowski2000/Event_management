@@ -74,6 +74,10 @@ export default function OrganizerReservationsPage() {
                 </b>{" "}
                 {r.checked_in && "(obecny)"}
               </span>
+              <div style={{ fontSize: 14, opacity: 0.7 }}>
+                ID rezerwacji: {r.reservation_id}
+              </div>
+
             </div>
 
             <div style={{ marginTop: 4 }}>
