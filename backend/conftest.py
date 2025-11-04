@@ -6,7 +6,7 @@ import uuid
 
 
 
-# ✅ Wyłączamy sygnał aktywacji usera w testach (bo generuje śmieci w DB)
+#  Wyłączam sygnał aktywacji usera w testach (bo generuje śmieci w DB)
 @pytest.fixture(autouse=True, scope="session")
 def disable_activation_email_signal():
     from users.signals.send_activation_email import send_activation_email  # noqa
@@ -15,7 +15,7 @@ def disable_activation_email_signal():
     post_save.connect(send_activation_email)
 
 
-# ✅ Czyścimy bazę pomiędzy testami (sqlite nie wspiera TRUNCATE)
+#  Czyszcze bazę pomiędzy testami (sqlite nie wspiera TRUNCATE)
 @pytest.fixture(autouse=True)
 def clean_db():
     with connection.cursor() as cursor:
@@ -23,7 +23,6 @@ def clean_db():
         cursor.execute("DELETE FROM users_activationtoken;")
         cursor.execute("DELETE FROM reservations_reservation;")
         cursor.execute("DELETE FROM events_event;")
-        cursor.execute("DELETE FROM notifications_notification;")
         cursor.execute("DELETE FROM users_customuser;")
         cursor.execute("PRAGMA foreign_keys = ON;")
     yield

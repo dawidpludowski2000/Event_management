@@ -1,36 +1,171 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+EventFlow – Frontend
 
-## Getting Started
+Frontend aplikacji EventFlow, zbudowany w Next.js (TypeScript + React + Tailwind).
+System zapewnia pełny przepływ użytkownika: rejestracja, logowanie JWT, tworzenie wydarzeń, rezerwacje, panel organizatora i administratora oraz obsługę QR-check-in z metrykami w czasie rzeczywistym.
 
-First, run the development server:
+Główne funkcjonalności
 
-```bash
+• Rejestracja użytkowników z linkiem aktywacyjnym (Gmail SMTP z backendu)
+• Logowanie i wylogowanie przez JWT (access / refresh token)
+• Widok publiczny wydarzeń (lista i szczegóły)
+• Panel użytkownika: lista własnych rezerwacji
+• Panel organizatora: zarządzanie wydarzeniami, potwierdzanie rezerwacji, check-in
+• Skaner QR kodów z podglądem i akcją "check-in"
+• Live metryki wydarzenia (WebSocket – Channels/Redis)
+• Panel administratora (nadawanie ról)
+• Toasty potwierdzeń akcji (react-hot-toast)
+• Routing z ochroną stron prywatnych
+• Czysta struktura kodu według zasady SRP (Single Responsibility Principle)
+
+Struktura projektu
+
+frontend/
+│ app/ → strony (Next.js App Router)
+│ ├ login/ → logowanie
+│ ├ register/ → rejestracja
+│ ├ events/ → lista i szczegóły wydarzeń
+│ ├ my-reservations/ → rezerwacje użytkownika
+│ ├ organizer-reservation/ → panel organizatora
+│ ├ admin-panel/ → panel administratora
+│ └ layout.tsx → wspólny layout aplikacji
+│
+├ components/ → komponenty UI (formularze, przyciski, listy, QRScanner)
+├ lib/
+│ ├ api/ → funkcje do komunikacji z backendem
+│ ├ hooks/ → logika i hooki (useEventMetricsWS, useOrganizerScanData)
+│ └ utils/ → funkcje pomocnicze (token handling, role, fetch wrapper)
+│
+├ public/ → grafiki, favicon, itp.
+├ Dockerfile
+└ package.json
+
+Uruchomienie lokalne (Docker Compose)
+
+Wymagania: Docker i Docker Compose
+
+Skopiuj plik ".env.dev" i zmień jego nazwę na ".env"
+
+Uruchom kontenery poleceniem:
+docker compose up --build
+
+Frontend uruchomi się automatycznie na http://localhost:3000
+
+Komunikacja z backendem odbywa się przez zmienną środowiskową NEXT_PUBLIC_API_BASE_URL (np. http://backend:8000
+)
+
+Środowisko (.env)
+
+NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+
+NEXT_PUBLIC_WS_BASE_URL=ws://backend:8000
+NEXT_PUBLIC_BACKEND_HEALTHCHECK=http://backend:8000/healthcheck/
+
+Główne zależności
+
+• Next.js 15 (App Router)
+• React 19
+• TypeScript
+• Tailwind CSS
+• react-hot-toast (powiadomienia)
+• react-qr-reader (skanowanie QR kodów)
+• lucide-react (ikony)
+• Axios (fetch wrapper w lib/api)
+
+Routing i widoki
+
+Publiczne:
+
+/login – logowanie JWT
+
+/register – rejestracja
+
+/events – lista dostępnych wydarzeń
+
+Użytkownik:
+
+/my-reservations – lista własnych rezerwacji
+
+Organizer:
+
+/organizer-reservation – podgląd rezerwacji + akcje
+
+/organizer-reservation/scan – skaner QR + check-in
+
+/organizer-edit-my-events – edycja wydarzenia
+
+Administrator:
+
+/admin-panel – nadawanie ról i zarządzanie użytkownikami
+
+Dodatkowe:
+
+Autoryzacja i role
+
+Autoryzacja działa w oparciu o JWT tokeny zapisane w localStorage.
+Każda strona chroniona wykorzystuje helper "checkIfOrganizer" lub "checkIfAdmin" (z pliku lib/utils/roles.ts).
+Tokeny są automatycznie przekazywane w nagłówkach przez "authFetch()" (lib/utils/fetchWrapper.ts).
+
+WebSocket i metryki
+
+Komunikacja z backendem ("/ws/events/<event_id>/") realizowana przez hook:
+useEventMetricsWS.ts
+
+Dane aktualizują się w czasie rzeczywistym przy każdej zmianie rezerwacji lub check-in.
+Hook useOrganizerScanData.ts synchronizuje dane skanera i listy wydarzeń.
+
+Uruchomienie bez Dockera (tryb dev)
+
+Zainstaluj zależności:
+npm install
+
+Utwórz plik ".env.local" i ustaw adres backendu:
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+
+Uruchom dev serwer:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build produkcyjny (CI/CD)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Lint i testy typów:
+npm run lint
+npm run type-check
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build:
+npm run build
 
-## Learn More
+Start serwera (Node.js):
+npm start
 
-To learn more about Next.js, take a look at the following resources:
+Projekt wspiera pipeline CI (GitHub Actions) z krokami:
+• instalacja zależności
+• lint / typecheck / build
+• ewentualny deploy na Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Testowanie (E2E / Manualne)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Typowy przepływ testowy (manualny):
 
-## Deploy on Vercel
+Rejestracja nowego użytkownika
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Aktywacja konta przez link e-mail
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Logowanie JWT
+
+Organizator tworzy i publikuje wydarzenie
+
+Użytkownik dokonuje rezerwacji
+
+Organizator potwierdza / odrzuca zgłoszenie
+
+Skanowanie QR kodu i check-in
+
+Metryki aktualizują się w czasie rzeczywistym
+
+Produkcja / Deploy
+
+• Backend uruchomiony w Dockerze (Railway / Render / Fly.io)
+• Frontend wdrożony na Vercel (automatyczny build z GitHub Actions)
+• Warto ustawić zmienne środowiskowe w Vercel:
+NEXT_PUBLIC_API_BASE_URL=https://your-backend-url
+
+NEXT_PUBLIC_WS_BASE_URL=wss://your-backend-url
